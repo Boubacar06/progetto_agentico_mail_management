@@ -2,7 +2,14 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+
+# Proviamo a importare il modello Google; se fallisce useremo solo il DummyLLM
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore
+    HAS_GOOGLE = True
+except Exception:
+    ChatGoogleGenerativeAI = None  # type: ignore[assignment]
+    HAS_GOOGLE = False
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
 if SRC.exists():
@@ -31,7 +38,12 @@ class DummyLLM:
 
 load_dotenv()
 google_key = os.getenv("GOOGLE_API_KEY")
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0) if google_key else DummyLLM()
+
+# Se abbiamo sia la libreria che la chiave API usiamo Gemini, altrimenti DummyLLM
+if HAS_GOOGLE and google_key:
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+else:
+    llm = DummyLLM()
 
 classifier = SpamClassifierAgent(llm=llm, tools={})
 semantic = SemanticAnalyzerAgent(llm=llm)
