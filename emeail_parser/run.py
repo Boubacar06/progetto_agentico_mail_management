@@ -1,7 +1,59 @@
 import os
 import sys
+import webbrowser
 from pathlib import Path
 from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SRC = Path(__file__).resolve().parent / "src"
+if SRC.exists():
+    sys.path.append(str(SRC))
+
+def _truthy_env(name: str) -> bool:
+    return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+def _find_dir(*candidates: Path) -> Path | None:
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+def _should_run_pipeline() -> bool:
+    return _truthy_env("RUN_PIPELINE") or "--run-agents" in sys.argv
+
+def _run_frontend_server() -> None:
+    try:
+        from flask import Flask, render_template
+    except Exception as exc:
+        raise SystemExit("Flask non installato. Installa Flask o usa app.py per servire il frontend.") from exc
+
+    templates_dir = _find_dir(PROJECT_ROOT / "templates", PROJECT_ROOT / "Templates")
+    static_dir = _find_dir(PROJECT_ROOT / "static", PROJECT_ROOT / "Templates" / "static")
+    if not templates_dir:
+        raise SystemExit("Cartella templates non trovata (templates/ o Templates/).")
+
+    app = Flask(
+        __name__,
+        template_folder=str(templates_dir),
+        static_folder=str(static_dir) if static_dir else None,
+        static_url_path="/static",
+    )
+
+    @app.route("/")
+    def index():
+        return render_template("index.html")
+
+    port = int(os.getenv("FRONTEND_PORT", "8000"))
+    debug = _truthy_env("FLASK_DEBUG")
+    auto_open = os.getenv("AUTO_OPEN_BROWSER", "1").strip().lower() not in {"0", "false", "no", "off"}
+    url = f"http://127.0.0.1:{port}/"
+    if auto_open:
+        webbrowser.open(url)
+    app.run(host="127.0.0.1", port=port, debug=debug)
+
+if not _should_run_pipeline():
+    _run_frontend_server()
+    raise SystemExit(0)
 
 # Proviamo a importare il modello Google; se fallisce useremo solo il DummyLLM
 try:
@@ -10,10 +62,6 @@ try:
 except Exception:
     ChatGoogleGenerativeAI = None  # type: ignore[assignment]
     HAS_GOOGLE = False
-ROOT = Path(__file__).parent
-SRC = ROOT / "src"
-if SRC.exists():
-    sys.path.append(str(SRC))
 
 from email_agents.shared_state import SharedState  # type: ignore
 from email_agents.graph import build_graph  # type: ignore
