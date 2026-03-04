@@ -1,1 +1,64 @@
-[]
+[
+  {
+    "id": "e4df8503-e760-4f1f-9da7-225263de7272",
+    "mittente": "pippo@gmail.com",
+    "destinatario": "pluto@gmail.com",
+    "messaggio": "ciaooooo",
+    "timestamp": "2026-03-04T20:34:05.190Z",
+    "categoria": "Importante",
+    "paroleChiave": [
+      "support_request",
+      "neutral",
+      "medium"
+    ],
+    "riassunto": "User needs assistance",
+    "classification": {
+      "confidence": 0.82,
+      "is_spam": false,
+      "model": "dummy"
+    },
+    "semantic": {
+      "intent": "support_request",
+      "model": "dummy",
+      "summary": "User needs assistance",
+      "tone": "neutral",
+      "urgency": "medium"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "keyword heuristic"
+    },
+    "request_id": "b13889f9-865b-469d-89cf-446fea035437"
+  },
+  {
+    "id": "b5b1c799-ac23-4d4f-bd67-cc58bbe0ac91",
+    "mittente": "pluto@gmail.com",
+    "destinatario": "pippo@gmail.com",
+    "messaggio": "baci ai pupi",
+    "timestamp": "2026-03-04T20:34:38.376Z",
+    "categoria": "Importante",
+    "paroleChiave": [
+      "support_request",
+      "neutral",
+      "medium"
+    ],
+    "riassunto": "User needs assistance",
+    "classification": {
+      "confidence": 0.82,
+      "is_spam": false,
+      "model": "dummy"
+    },
+    "semantic": {
+      "intent": "support_request",
+      "model": "dummy",
+      "summary": "User needs assistance",
+      "tone": "neutral",
+      "urgency": "medium"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "keyword heuristic"
+    },
+    "request_id": "7d8b4b75-3a63-47f5-b1e6-f92ee3e1c8c5"
+  }
+]

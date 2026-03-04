@@ -130,7 +130,7 @@ function aggiornaListaEmail() {
 	}
 }
 
-emailForm.addEventListener('submit', async (e) => {
+emailForm?.addEventListener('submit', async (e) => {
 	e.preventDefault();
 
 	const mittente = mittenteInput.value.trim();
@@ -223,23 +223,23 @@ emailForm.addEventListener('submit', async (e) => {
 	}
 });
 
-resetBtn.addEventListener('click', () => {
+resetBtn?.addEventListener('click', () => {
 	emailForm.reset();
 	charCount.textContent = '0';
-	risultatiAnalisi.classList.add('hidden');
+	risultatiAnalisi?.classList.add('hidden');
 });
 
-messaggioInput.addEventListener('input', function () {
+messaggioInput?.addEventListener('input', function () {
 	charCount.textContent = this.value.length;
 });
 
-ricercaInput.addEventListener('input', function () {
+ricercaInput?.addEventListener('input', function () {
 	termineRicerca = this.value.trim();
 	pulisciRicerca.classList.toggle('hidden', !termineRicerca);
 	aggiornaListaEmail();
 });
 
-pulisciRicerca.addEventListener('click', () => {
+pulisciRicerca?.addEventListener('click', () => {
 	ricercaInput.value = '';
 	termineRicerca = '';
 	pulisciRicerca.classList.add('hidden');
@@ -259,14 +259,19 @@ categoriaBtns.forEach((btn) => {
 	});
 });
 
-chiudiModale.addEventListener('click', () => modaleEmail.classList.add('hidden'));
-chiudiModale2.addEventListener('click', () => modaleEmail.classList.add('hidden'));
+chiudiModale?.addEventListener('click', () => modaleEmail?.classList.add('hidden'));
+chiudiModale2?.addEventListener('click', () => modaleEmail?.classList.add('hidden'));
 
-modaleEmail.addEventListener('click', (e) => {
+modaleEmail?.addEventListener('click', (e) => {
 	if (e.target === modaleEmail) modaleEmail.classList.add('hidden');
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+	if (!risultatiAnalisi || !listaEmail || !nessunaEmail || !conteggioEmail) {
+		console.error('UI non inizializzata: elementi DOM mancanti.');
+		return;
+	}
+
 	risultatiAnalisi.classList.add('hidden');
 	// Load persisted email history
 	(async () => {

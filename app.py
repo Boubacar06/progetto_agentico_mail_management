@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
 from emeail_parser.run import SharedState, get_executor  # type: ignore
 
@@ -95,6 +95,15 @@ def _history_to_json(history: List[Any], request_id: str) -> List[Dict[str, Any]
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    static_dir = Path(app.root_path) / "static"
+    icon_path = static_dir / "favicon.ico"
+    if icon_path.exists():
+        return send_from_directory(static_dir, "favicon.ico")
+    return ("", 204)
 
 
 @app.route("/api/analyze", methods=["POST"])
