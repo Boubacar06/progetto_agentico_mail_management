@@ -2,7 +2,13 @@ import os
 import sys
 import webbrowser
 from pathlib import Path
-from dotenv import load_dotenv
+from functools import lru_cache
+
+try:
+    from dotenv import load_dotenv  # type: ignore
+except Exception:  # pragma: no cover
+    def load_dotenv(*args, **kwargs):  # type: ignore
+        return False
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC = Path(__file__).resolve().parent / "src"
@@ -51,9 +57,11 @@ def _run_frontend_server() -> None:
         webbrowser.open(url)
     app.run(host="127.0.0.1", port=port, debug=debug)
 
-if not _should_run_pipeline():
-    _run_frontend_server()
-    raise SystemExit(0)
+
+def _maybe_run_frontend_when_script() -> None:
+    if not _should_run_pipeline():
+        _run_frontend_server()
+        raise SystemExit(0)
 
 # Proviamo a importare il modello Google; se fallisce useremo solo il DummyLLM
 try:
@@ -84,29 +92,60 @@ class DummyLLM:
             return type("Resp", (), {"content": f'{{"department": "{dept}", "rationale": "keyword heuristic"}}'})()
         return type("Resp", (), {"content": '{"intent": "support_request", "tone": "neutral", "urgency": "medium", "summary": "User needs assistance"}'})()
 
-load_dotenv()
-google_key = os.getenv("GOOGLE_API_KEY")
 
-# Se abbiamo sia la libreria che la chiave API usiamo Gemini, altrimenti DummyLLM
-if HAS_GOOGLE and google_key:
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
-else:
-    llm = DummyLLM()
+def _build_llm():
+    load_dotenv()
+    google_key = os.getenv("GOOGLE_API_KEY")
 
-classifier = SpamClassifierAgent(llm=llm, tools={})
-semantic = SemanticAnalyzerAgent(llm=llm)
-router = RouterAgent(llm=llm)
+    # Se abbiamo sia la libreria che la chiave API usiamo Gemini, altrimenti DummyLLM
+    if HAS_GOOGLE and google_key:
+        return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+    return DummyLLM()
 
-compiled = build_graph(classifier, semantic, router)
-executor = GraphExecutor(compiled)
 
-# sample_email = """From: user@example.com\nTo: support@example.com\nSubject: Help needed\n\nHi team, I cannot access the VPN since yesterday. Please assist."""
-sample_email = """From: user@example.com\nTo: support@example.com\nSubject: Ciao, ho bisogno di aiuto\n\nNon riesco ad accedere alla VPN da ieri. Per favore assistenza."""
-state = SharedState(raw_email=sample_email)
+@lru_cache(maxsize=1)
+def get_compiled():
+    llm = _build_llm()
+    classifier = SpamClassifierAgent(llm=llm, tools={})
+    semantic = SemanticAnalyzerAgent(llm=llm)
+    router = RouterAgent(llm=llm)
+    return build_graph(classifier, semantic, router)
 
-final_state = executor.run(state)
-print("Status:", final_state.status)
-print("Classification:", final_state.classification)
-print("Semantic:", final_state.semantic)
-print("Routing:", final_state.routing)
-print("History entries:", len(final_state.history))
+
+@lru_cache(maxsize=1)
+def get_executor() -> GraphExecutor:
+    return GraphExecutor(get_compiled())
+
+
+# Backward-compatible module attributes (lazy)
+compiled = None
+executor = None
+
+
+def _ensure_runtime_globals() -> None:
+    global compiled, executor
+    if compiled is None:
+        compiled = get_compiled()
+    if executor is None:
+        executor = GraphExecutor(compiled)
+
+
+def main() -> None:
+    _maybe_run_frontend_when_script()
+
+    _ensure_runtime_globals()
+
+    # sample_email = """From: user@example.com\nTo: support@example.com\nSubject: Help needed\n\nHi team, I cannot access the VPN since yesterday. Please assist."""
+    sample_email = """From: user@example.com\nTo: support@example.com\nSubject: Ciao, ho bisogno di aiuto\n\nNon riesco ad accedere alla VPN da ieri. Per favore assistenza."""
+    state = SharedState(raw_email=sample_email)
+
+    final_state = executor.run(state)
+    print("Status:", final_state.status)
+    print("Classification:", final_state.classification)
+    print("Semantic:", final_state.semantic)
+    print("Routing:", final_state.routing)
+    print("History entries:", len(final_state.history))
+
+
+if __name__ == "__main__":
+    main()

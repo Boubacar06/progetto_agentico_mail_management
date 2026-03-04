@@ -26,12 +26,13 @@ const chiudiModale = document.getElementById('chiudiModale');
 const chiudiModale2 = document.getElementById('chiudiModale2');
 
 function formattaData(data) {
+	const d = data instanceof Date ? data : new Date(data);
 	return new Intl.DateTimeFormat('it-IT', {
 		month: 'short',
 		day: 'numeric',
 		hour: '2-digit',
 		minute: '2-digit',
-	}).format(data);
+	}).format(d);
 }
 
 function creaBadgeCategoria(categoria) {
@@ -72,7 +73,8 @@ function aggiungiEmail(email) {
 	`;
 
 	emailElement.addEventListener('click', () => mostraDettagliEmail(email));
-	listaEmail.insertBefore(emailElement, listaEmail.firstChild);
+	// Insert before the "empty state" placeholder so ordering is stable
+	listaEmail.insertBefore(emailElement, nessunaEmail);
 }
 
 function mostraDettagliEmail(email) {
@@ -149,6 +151,11 @@ emailForm.addEventListener('submit', async (e) => {
 		if (!res.ok) throw new Error('Errore API');
 
 		const data = await res.json();
+		if (data.history) {
+			console.groupCollapsed('Pipeline logs');
+			console.log(data.history);
+			console.groupEnd();
+		}
 
 		const semantic = data.semantic || {};
 		const routing = data.routing || {};
@@ -172,16 +179,27 @@ emailForm.addEventListener('submit', async (e) => {
 
 		const riassunto = semantic.summary || (messaggio.length > 100 ? messaggio.slice(0, 100) + '...' : messaggio);
 
-		const nuovaEmail = {
-			id: Date.now().toString(),
-			mittente,
-			destinatario,
-			messaggio,
-			categoria,
-			paroleChiave,
-			riassunto,
-			timestamp: new Date(),
-		};
+		// Persist via backend JSON store
+		const saveRes = await fetch('/api/emails', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				mittente,
+				destinatario,
+				messaggio,
+				timestamp: new Date().toISOString(),
+				categoria,
+				paroleChiave,
+				riassunto,
+				classification,
+				semantic,
+				routing,
+				request_id: data.request_id,
+			}),
+		});
+		if (!saveRes.ok) throw new Error('Errore salvataggio email');
+		const saved = await saveRes.json();
+		const nuovaEmail = saved.email;
 
 		emails.unshift(nuovaEmail);
 
@@ -250,4 +268,19 @@ modaleEmail.addEventListener('click', (e) => {
 
 document.addEventListener('DOMContentLoaded', () => {
 	risultatiAnalisi.classList.add('hidden');
+	// Load persisted email history
+	(async () => {
+		try {
+			const res = await fetch('/api/emails');
+			if (!res.ok) throw new Error('Errore caricamento cronologia');
+			const data = await res.json();
+			emails = (data.emails || []).map((e) => ({
+				...e,
+				paroleChiave: e.paroleChiave || [],
+			}));
+			aggiornaListaEmail();
+		} catch (err) {
+			console.error(err);
+		}
+	})();
 });

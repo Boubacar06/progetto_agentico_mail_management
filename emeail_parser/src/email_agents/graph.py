@@ -6,6 +6,29 @@ from .agents.semantic_analyzer import SemanticAnalyzerAgent
 from .agents.router import RouterAgent
 from .tools.parse_email import parse_email
 
+
+class _CompiledGraphWrapper:
+    def __init__(self, compiled: Any):
+        self._compiled = compiled
+
+    def invoke(self, state: SharedState) -> SharedState:
+        result_state = self._compiled.invoke(state)
+        if isinstance(result_state, dict) and not isinstance(result_state, SharedState):
+            base = state.model_dump()
+            result_state = SharedState(**{**base, **result_state})
+        return result_state
+
+    def stream(self, state: SharedState):
+        for step in self._compiled.stream(state):
+            if isinstance(step, dict) and not isinstance(step, SharedState):
+                base = state.model_dump()
+                yield SharedState(**{**base, **step})
+            else:
+                yield step
+
+    def __getattr__(self, name: str):
+        return getattr(self._compiled, name)
+
 # Simple wrapper for calling .run on agents
 
 def build_graph(classifier: SpamClassifierAgent, semantic: SemanticAnalyzerAgent, router: RouterAgent):
@@ -64,4 +87,4 @@ def build_graph(classifier: SpamClassifierAgent, semantic: SemanticAnalyzerAgent
     graph.add_edge("semantic", "router")
     graph.add_edge("router", END)
 
-    return graph.compile()
+    return _CompiledGraphWrapper(graph.compile())
