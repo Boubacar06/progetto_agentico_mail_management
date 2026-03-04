@@ -34,7 +34,13 @@ class _CompiledGraphWrapper:
 def build_graph(classifier: SpamClassifierAgent, semantic: SemanticAnalyzerAgent, router: RouterAgent):
     graph = StateGraph(SharedState)
 
+    def handoff(state: SharedState, from_agent: str, to_agent: str, **data: Any) -> None:
+        # Centralized transition log so execution flow is easy to follow in history and file logs.
+        state.log("orchestrator", "handoff", from_agent=from_agent, to_agent=to_agent, **data)
+
     def parse_node(state: SharedState):
+        if not state.history:
+            state.log("orchestrator", "start", entry_point="parse")
         # Only parse if not already parsed
         if state.subject is None or state.body_text is None:
             # parse_email is a StructuredTool; underlying callable is .func
@@ -46,18 +52,55 @@ def build_graph(classifier: SpamClassifierAgent, semantic: SemanticAnalyzerAgent
             state.recipients = parsed.get("recipients", [])
             state.headers = parsed.get("headers", {})
             state.log("parser", "parsed", subject=state.subject)
+        handoff(
+            state,
+            from_agent="parser",
+            to_agent="spam_classifier",
+            subject=state.subject,
+            body_length=len(state.body_text or ""),
+        )
         return state
 
     def classifier_node(state: SharedState):
         classifier.run(state)
+        if state.status == "spam":
+            handoff(
+                state,
+                from_agent="spam_classifier",
+                to_agent="END",
+                decision="spam",
+                confidence=state.classification.confidence if state.classification else None,
+            )
+        else:
+            handoff(
+                state,
+                from_agent="spam_classifier",
+                to_agent="semantic_analyzer",
+                decision="ham",
+                confidence=state.classification.confidence if state.classification else None,
+            )
         return state
 
     def semantic_node(state: SharedState):
         semantic.run(state)
+        handoff(
+            state,
+            from_agent="semantic_analyzer",
+            to_agent="router",
+            intent=state.semantic.intent if state.semantic else None,
+            tone=state.semantic.tone if state.semantic else None,
+            urgency=state.semantic.urgency if state.semantic else None,
+        )
         return state
 
     def router_node(state: SharedState):
         router.run(state)
+        handoff(
+            state,
+            from_agent="router",
+            to_agent="END",
+            department=state.routing.department if state.routing else None,
+        )
         return state
 
     graph.add_node("parse", parse_node)

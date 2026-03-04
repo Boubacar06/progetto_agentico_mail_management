@@ -1,6 +1,8 @@
 import json
 from ..shared_state import SharedState, RoutingDecision
 from ..prompts import routing_prompt
+from ..prompt_logging import prompt_for_logs, should_log_prompts
+from loguru import logger
 
 _DEPT_MAP = {"hr": "HR", "it": "IT", "sales": "SALES", "finance": "FINANCE", "support": "SUPPORT"}
 
@@ -20,8 +22,11 @@ class RouterAgent:
         prompt = routing_prompt.format(
             intent=state.semantic.intent or "", tone=state.semantic.tone or "", urgency=state.semantic.urgency or "", subject=state.subject or "", body=state.body_text or ""
         )
+        if should_log_prompts():
+            logger.info("[PROMPT][{}] {}", self.name, prompt_for_logs(prompt))
         response = getattr(self.llm, "invoke", lambda x: self.llm.predict(x))(prompt)
         content = getattr(response, "content", response)
+        logger.info("[MODEL_OUTPUT][{}] {}", self.name, content)
         try:
             data = json.loads(content)
         except json.JSONDecodeError:

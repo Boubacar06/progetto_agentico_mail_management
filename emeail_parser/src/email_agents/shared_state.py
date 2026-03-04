@@ -2,9 +2,7 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from datetime import datetime
-import logging
-
-_logger = logging.getLogger("email_agents")
+from loguru import logger
 
 class ClassificationResult(BaseModel):
     is_spam: bool = False
@@ -58,7 +56,12 @@ class SharedState(BaseModel):
         self.history.append(entry)
         # Keep logs lightweight: avoid dumping entire raw email
         safe_data = {k: v for k, v in data.items() if k not in {"raw_email", "body_html", "body_text"}}
-        _logger.info("%s:%s %s", agent, action, safe_data)
+        logger.bind(component="agent", agent=agent, action=action).info(
+            "{}:{} {}",
+            agent,
+            action,
+            safe_data,
+        )
 
     def mark_error(self, agent: str, message: str) -> None:
         self.status = "error"

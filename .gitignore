@@ -1,3 +1,5 @@
 *.pyc
 emeail_parser/tests
 .vscode/
+
+.env

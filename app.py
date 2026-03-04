@@ -11,10 +11,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from flask import Flask, jsonify, render_template, request, send_from_directory
+from loguru import logger
 
 from emeail_parser.run import SharedState, get_executor  # type: ignore
+from emeail_parser.logging_setup import configure_logging
 
 app = Flask(__name__)
+
+LOG_DIR = configure_logging()
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
@@ -114,11 +118,24 @@ def analyze_email():
     recipient = data.get("destinatario") or data.get("recipient") or "support@example.com"
     message = data.get("messaggio") or data.get("body") or ""
 
+    logger.bind(request_id=request_id, source="frontend").info(
+        "analyze_email received | sender={} recipient={} chars={}",
+        sender,
+        recipient,
+        len(message),
+    )
+
     raw_email = f"From: {sender}\nTo: {recipient}\nSubject: Analisi da frontend\n\n{message}"
 
     state = SharedState(raw_email=raw_email)
     executor = get_executor()
     final_state = executor.run(state)
+
+    logger.bind(request_id=request_id, source="frontend").info(
+        "analyze_email completed | status={} history_entries={}",
+        final_state.status,
+        len(final_state.history or []),
+    )
 
     history_json = _history_to_json(final_state.history or [], request_id=request_id)
     for event in history_json:
@@ -202,4 +219,5 @@ def get_logs():
 
 
 if __name__ == "__main__":
+    logger.info("Starting Flask app | log_dir={}", LOG_DIR)
     app.run(debug=True)

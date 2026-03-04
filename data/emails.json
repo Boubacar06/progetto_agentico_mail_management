@@ -60,5 +60,98 @@
       "rationale": "keyword heuristic"
     },
     "request_id": "7d8b4b75-3a63-47f5-b1e6-f92ee3e1c8c5"
+  },
+  {
+    "id": "0c253913-ba44-487d-9e3a-cfd5d7eaa8b2",
+    "mittente": "topolino@gmail.com",
+    "destinatario": "pippo@hotmail.it",
+    "messaggio": "saluta i cari",
+    "timestamp": "2026-03-04T20:54:00.642Z",
+    "categoria": "Importante",
+    "paroleChiave": [
+      "support_request",
+      "neutral",
+      "medium"
+    ],
+    "riassunto": "User needs assistance",
+    "classification": {
+      "confidence": 0.82,
+      "is_spam": false,
+      "model": "dummy"
+    },
+    "semantic": {
+      "intent": "support_request",
+      "model": "dummy",
+      "summary": "User needs assistance",
+      "tone": "neutral",
+      "urgency": "medium"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "keyword heuristic"
+    },
+    "request_id": "c12fbe5e-b155-4f82-b4d3-a96d4ed19668"
+  },
+  {
+    "id": "6d386d61-2127-49d3-b494-5d577e4a8bc5",
+    "mittente": "mario@hotmail.it",
+    "destinatario": "ugo@yahoo.it",
+    "messaggio": "a zacinto",
+    "timestamp": "2026-03-04T21:03:53.323Z",
+    "categoria": "Importante",
+    "paroleChiave": [
+      "support_request",
+      "neutral",
+      "medium"
+    ],
+    "riassunto": "User needs assistance",
+    "classification": {
+      "confidence": 0.82,
+      "is_spam": false,
+      "model": "dummy"
+    },
+    "semantic": {
+      "intent": "support_request",
+      "model": "dummy",
+      "summary": "User needs assistance",
+      "tone": "neutral",
+      "urgency": "medium"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "keyword heuristic"
+    },
+    "request_id": "5065560a-f1e0-413f-8717-382f31fcf19e"
+  },
+  {
+    "id": "52d90d3c-96c3-41c9-9f67-0ebc3bda5438",
+    "mittente": "pippo@gmail.com",
+    "destinatario": "paolo@gmail.com",
+    "messaggio": "Salve, la contatto per informarla che prendere appuntamento deve chiamare al numero 3331233133 e fornire le sue preferenze di orario.\n\nmi raccomando all'appuntamento porti il pc da riparare ed anche un panino",
+    "timestamp": "2026-03-04T21:44:26.849Z",
+    "categoria": "Importante",
+    "paroleChiave": [
+      "support_request",
+      "neutral",
+      "medium"
+    ],
+    "riassunto": "User needs assistance",
+    "classification": {
+      "confidence": 0.82,
+      "is_spam": false,
+      "model": "dummy"
+    },
+    "semantic": {
+      "intent": "support_request",
+      "model": "dummy",
+      "summary": "User needs assistance",
+      "tone": "neutral",
+      "urgency": "medium"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "keyword heuristic"
+    },
+    "request_id": "992072e2-d4ae-4c3d-ae25-7e3393e5fa97"
   }
 ]

@@ -1,0 +1,7 @@
+2026-03-04 21:48:25.442 | INFO     | emeail_parser.logging_setup:configure_logging:51 | Loguru configured. Log directory: C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-04 21:48:27.806 | INFO     | app:analyze_email:121 | analyze_email received | sender=a@a.com recipient=b@b.com chars=31
+2026-03-04 21:48:27.822 | INFO     | email_agents.shared_state:log:59 | parser:parsed {'subject': 'Analisi da frontend'}
+2026-03-04 21:48:27.824 | INFO     | email_agents.shared_state:log:59 | spam_classifier:classified {'is_spam': False, 'confidence': 0.82}
+2026-03-04 21:48:27.824 | INFO     | email_agents.shared_state:log:59 | semantic_analyzer:semantic {'intent': 'support_request', 'tone': 'neutral', 'urgency': 'medium', 'summary': 'User needs assistance'}
+2026-03-04 21:48:27.824 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'IT'}
+2026-03-04 21:48:27.824 | INFO     | app:analyze_email:134 | analyze_email completed | status=routed history_entries=4

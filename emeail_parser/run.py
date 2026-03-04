@@ -4,10 +4,18 @@ import webbrowser
 import json
 import threading
 import uuid
+from urllib import request as urllib_request
+from urllib import error as urllib_error
 from pathlib import Path
 from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
+from loguru import logger
+
+try:
+    from emeail_parser.logging_setup import configure_logging
+except ModuleNotFoundError:  # pragma: no cover - script execution fallback
+    from logging_setup import configure_logging  # type: ignore
 
 try:
     from dotenv import load_dotenv  # type: ignore
@@ -23,6 +31,7 @@ if SRC.exists():
 DATA_DIR = PROJECT_ROOT / "data"
 EMAILS_FILE = DATA_DIR / "emails.json"
 _emails_lock = threading.Lock()
+LOG_DIR = configure_logging()
 
 def _truthy_env(name: str) -> bool:
     return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
@@ -89,11 +98,13 @@ def _run_frontend_server() -> None:
         url = f"http://127.0.0.1:{port}/"
         if auto_open:
             webbrowser.open(url)
+        logger.info("Starting root app server | url={} log_dir={}", url, LOG_DIR)
         root_app.run(host="127.0.0.1", port=port, debug=debug)
         return
     except Exception as exc:
         # Fall back to static frontend-only server when root app import is unavailable.
         print(f"[WARN] Avvio app completa non riuscito ({exc}); uso server frontend-only.")
+        logger.warning("Root app import failed, using fallback server: {}", exc)
 
     try:
         from flask import Flask, jsonify, render_template, request, send_from_directory
@@ -133,6 +144,13 @@ def _run_frontend_server() -> None:
         recipient = data.get("destinatario") or data.get("recipient") or "support@example.com"
         message = data.get("messaggio") or data.get("body") or ""
 
+        logger.bind(request_id=request_id, source="frontend").info(
+            "analyze_email received | sender={} recipient={} chars={}",
+            sender,
+            recipient,
+            len(message),
+        )
+
         raw_email = f"From: {sender}\\nTo: {recipient}\\nSubject: Analisi da frontend\\n\\n{message}"
         state = SharedState(raw_email=raw_email)
         executor = get_executor()
@@ -150,6 +168,12 @@ def _run_frontend_server() -> None:
                     "data": getattr(entry, "data", {}) or {},
                 }
             )
+
+        logger.bind(request_id=request_id, source="frontend").info(
+            "analyze_email completed | status={} history_entries={}",
+            final_state.status,
+            len(history_json),
+        )
 
         return jsonify(
             {
@@ -214,6 +238,7 @@ def _run_frontend_server() -> None:
     url = f"http://127.0.0.1:{port}/"
     if auto_open:
         webbrowser.open(url)
+    logger.info("Starting fallback app server | url={} log_dir={}", url, LOG_DIR)
     app.run(host="127.0.0.1", port=port, debug=debug)
 
 
@@ -230,12 +255,21 @@ except Exception:
     ChatGoogleGenerativeAI = None  # type: ignore[assignment]
     HAS_GOOGLE = False
 
+# Proviamo a importare OpenAI SDK; se manca useremo fallback.
+try:
+    from openai import OpenAI  # type: ignore
+    HAS_OPENAI = True
+except Exception:
+    OpenAI = None  # type: ignore[assignment]
+    HAS_OPENAI = False
+
 from email_agents.shared_state import SharedState  # type: ignore
 from email_agents.graph import build_graph  # type: ignore
 from email_agents.agents.classifier import SpamClassifierAgent  # type: ignore
 from email_agents.agents.semantic_analyzer import SemanticAnalyzerAgent  # type: ignore
 from email_agents.agents.router import RouterAgent  # type: ignore
 from email_agents.executor import GraphExecutor  # type: ignore
+from email_agents.prompt_logging import prompt_for_logs  # type: ignore
 
 # Fallback mock for development if no API key
 class DummyLLM:
@@ -252,13 +286,139 @@ class DummyLLM:
         return type("Resp", (), {"content": '{"intent": "support_request", "tone": "neutral", "urgency": "medium", "summary": "User needs assistance"}'})()
 
 
+class OpenAILLM:
+    """Small OpenAI wrapper compatible with existing agent calls (.invoke + model_name)."""
+
+    def __init__(self, api_key: str, model: str):
+        self.model_name = model
+        self._client = OpenAI(api_key=api_key)
+
+    def invoke(self, prompt: str):
+        try:
+            resp = self._client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an email triage assistant. Return only valid JSON when asked.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0,
+            )
+            content = (resp.choices[0].message.content or "{}").strip()
+            return type("Resp", (), {"content": content})()
+        except Exception:
+            logger.exception("OpenAI API call failed | model={} | prompt={}", self.model_name, prompt_for_logs(prompt))
+            raise
+
+
+class OllamaLLM:
+    """Minimal Ollama client compatible with existing agent calls (.invoke + model_name)."""
+
+    def __init__(self, model: str, base_url: str):
+        self.model_name = model
+        self.base_url = base_url.rstrip("/")
+
+    def invoke(self, prompt: str):
+        url = f"{self.base_url}/api/generate"
+        payload = {
+            "model": self.model_name,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"temperature": 0},
+        }
+        body = json.dumps(payload).encode("utf-8")
+        req = urllib_request.Request(
+            url,
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+
+        try:
+            with urllib_request.urlopen(req, timeout=120) as resp:  # nosec B310
+                raw = resp.read().decode("utf-8")
+            parsed = json.loads(raw)
+            content = (parsed.get("response") or "{}").strip()
+            return type("Resp", (), {"content": content})()
+        except urllib_error.HTTPError as exc:
+            err_body = ""
+            try:
+                err_body = exc.read().decode("utf-8")
+            except Exception:
+                pass
+            logger.exception(
+                "Ollama HTTP error | model={} url={} status={} body={} prompt={}",
+                self.model_name,
+                url,
+                exc.code,
+                err_body,
+                prompt_for_logs(prompt),
+            )
+            raise
+        except Exception:
+            logger.exception(
+                "Ollama API call failed | model={} url={} prompt={}",
+                self.model_name,
+                url,
+                prompt_for_logs(prompt),
+            )
+            raise
+
+
 def _build_llm():
-    load_dotenv()
+    env_path = PROJECT_ROOT / ".env"
+    load_dotenv(dotenv_path=env_path, override=False)
+    provider = os.getenv("LLM_PROVIDER", "auto").strip().lower()
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+    ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+    openai_key = os.getenv("OPENAI_API_KEY")
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     google_key = os.getenv("GOOGLE_API_KEY")
+
+    if provider == "ollama":
+        logger.info("Using Ollama model '{}' at {}", ollama_model, ollama_base_url)
+        return OllamaLLM(model=ollama_model, base_url=ollama_base_url)
+
+    if provider == "openai":
+        if HAS_OPENAI and openai_key:
+            logger.info("Using OpenAI model '{}' for agent pipeline", openai_model)
+            return OpenAILLM(api_key=openai_key, model=openai_model)
+        logger.warning("LLM_PROVIDER=openai but OpenAI SDK/key missing; falling back")
+
+    if provider == "google":
+        if HAS_GOOGLE and google_key:
+            logger.info("Using Google model 'gemini-1.5-flash' for agent pipeline")
+            return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+        logger.warning("LLM_PROVIDER=google but Google SDK/key missing; falling back")
+
+    if provider == "dummy":
+        logger.warning("LLM_PROVIDER=dummy set; using DummyLLM")
+        return DummyLLM()
+
+    # Auto priority: Ollama -> OpenAI -> Gemini -> DummyLLM
+    if provider == "auto":
+        logger.info("LLM_PROVIDER=auto enabled")
+        try:
+            logger.info("Trying Ollama model '{}' at {}", ollama_model, ollama_base_url)
+            return OllamaLLM(model=ollama_model, base_url=ollama_base_url)
+        except Exception:
+            logger.warning("Ollama initialization failed; trying cloud providers")
+
+    if HAS_OPENAI and openai_key:
+        logger.info("Using OpenAI model '{}' for agent pipeline", openai_model)
+        return OpenAILLM(api_key=openai_key, model=openai_model)
+
+    if openai_key and not HAS_OPENAI:
+        logger.warning("OPENAI_API_KEY provided but OpenAI SDK not installed; falling back")
 
     # Se abbiamo sia la libreria che la chiave API usiamo Gemini, altrimenti DummyLLM
     if HAS_GOOGLE and google_key:
+        logger.info("Using Google model 'gemini-1.5-flash' for agent pipeline")
         return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+
+    logger.warning("No LLM API key configured; using DummyLLM")
     return DummyLLM()
 
 

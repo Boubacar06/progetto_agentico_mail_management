@@ -1,6 +1,8 @@
 import json
 from ..shared_state import SharedState, SemanticAnalysis
 from ..prompts import semantic_analysis_prompt
+from ..prompt_logging import prompt_for_logs, should_log_prompts
+from loguru import logger
 
 class SemanticAnalyzerAgent:
     name = "semantic_analyzer"
@@ -18,8 +20,11 @@ class SemanticAnalyzerAgent:
         # Flatten chat prompt messages into a single string for generic LLMs
         messages = semantic_analysis_prompt.format_messages(subject=state.subject or "", body=state.body_text)
         joined = "\n".join(m.content for m in messages if hasattr(m, "content"))
+        if should_log_prompts():
+            logger.info("[PROMPT][{}] {}", self.name, prompt_for_logs(joined))
         response = getattr(self.llm, "invoke", lambda x: getattr(self.llm, "predict", lambda y: "{}")(x))(joined)
         content = getattr(response, "content", response)
+        logger.info("[MODEL_OUTPUT][{}] {}", self.name, content)
         try:
             data = json.loads(content)
         except Exception:
