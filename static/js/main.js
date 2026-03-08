@@ -3,11 +3,15 @@
 let emails = [];
 let categoriaSelezionata = 'tutte';
 let termineRicerca = '';
+let allegatiAccumulati = [];
 
 const emailForm = document.getElementById('emailForm');
 const mittenteInput = document.getElementById('mittente');
 const destinatarioInput = document.getElementById('destinatario');
+const oggettoInput = document.getElementById('oggetto');
 const messaggioInput = document.getElementById('messaggio');
+const allegatiInput = document.getElementById('allegati');
+const listaAllegatiDiv = document.getElementById('listaAllegati');
 const charCount = document.getElementById('charCount');
 const inviaBtn = document.getElementById('inviaBtn');
 const resetBtn = document.getElementById('resetBtn');
@@ -51,10 +55,30 @@ function creaBadgeParolaChiave(parola) {
 	return `<span class="px-2 py-1 bg-gray-200 rounded text-sm">${parola}</span>`;
 }
 
+function leggiFileBase64(file) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(reader.result);
+		reader.onerror = () => reject(reader.error);
+		reader.readAsDataURL(file);
+	});
+}
+
+function nomeAllegato(a) {
+	return typeof a === 'string' ? a : a.name;
+}
+
 function aggiungiEmail(email) {
 	const emailElement = document.createElement('div');
 	emailElement.className = 'border rounded-lg p-4 hover:shadow-md transition cursor-pointer email-item';
 	emailElement.dataset.id = email.id;
+
+	const allegatiCount = (email.allegati || []).length;
+	const allegatiIcon = allegatiCount > 0 ? `<span class="text-gray-400 text-sm ml-2" title="${allegatiCount} allegat${allegatiCount === 1 ? 'o' : 'i'}"><i class="fas fa-paperclip"></i> ${allegatiCount}</span>` : '';
+
+	const paroleChiaveHtml = (email.paroleChiave || []).slice(0, 3).map((p) => creaBadgeParolaChiave(p)).join('');
+	const oggettoText = typeof email.oggetto === 'string' ? email.oggetto.replace(/</g, '&lt;') : '';
+	const riassuntoText = typeof email.riassunto === 'string' ? email.riassunto.replace(/</g, '&lt;') : '';
 
 	emailElement.innerHTML = `
 		<div class="flex items-start justify-between">
@@ -62,8 +86,10 @@ function aggiungiEmail(email) {
 				<div class="flex items-center gap-2">
 					<h3 class="font-medium text-gray-900">${email.mittente} → ${email.destinatario}</h3>
 					${creaBadgeCategoria(email.categoria || 'Altro')}
+					${allegatiIcon}
 				</div>
-				<p class="mt-1 text-sm text-gray-600 line-clamp-2">${email.riassunto}</p>
+				<p class="mt-1 text-sm font-medium text-indigo-700">${oggettoText}</p>
+				<p class="mt-1 text-sm text-gray-600 line-clamp-2">${riassuntoText}</p>
 				<div class="mt-2 flex flex-wrap gap-1">
 					${(email.paroleChiave || []).slice(0, 3).map((p) => creaBadgeParolaChiave(p)).join('')}
 				</div>
@@ -80,6 +106,7 @@ function aggiungiEmail(email) {
 function mostraDettagliEmail(email) {
 	document.getElementById('dettaglioMittente').textContent = email.mittente;
 	document.getElementById('dettaglioDestinatario').textContent = email.destinatario;
+	document.getElementById('dettaglioOggetto').textContent = email.oggetto || '';
 
 	const dettaglioCategoria = document.getElementById('dettaglioCategoria');
 	dettaglioCategoria.textContent = email.categoria || 'Altro';
@@ -91,6 +118,32 @@ function mostraDettagliEmail(email) {
 
 	document.getElementById('dettaglioRiassunto').textContent = email.riassunto;
 	document.getElementById('dettaglioMessaggio').textContent = email.messaggio;
+
+	const dettaglioAllegati = document.getElementById('dettaglioAllegati');
+	const allegati = email.allegati || [];
+	if (allegati.length > 0) {
+		dettaglioAllegati.innerHTML = '';
+		allegati.forEach((a) => {
+			const nome = nomeAllegato(a);
+			const haData = typeof a === 'object' && a.data;
+			if (haData) {
+				const link = document.createElement('a');
+				link.href = a.data;
+				link.download = a.name;
+				link.className = 'inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 text-indigo-700 rounded text-sm hover:bg-indigo-100 transition cursor-pointer';
+				link.innerHTML = `<i class="fas fa-download text-indigo-500"></i>${a.name}`;
+				dettaglioAllegati.appendChild(link);
+			} else {
+				const span = document.createElement('span');
+				span.className = 'inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm';
+				span.innerHTML = `<i class="fas fa-file text-gray-500"></i>${nome}`;
+				dettaglioAllegati.appendChild(span);
+			}
+		});
+	} else {
+		dettaglioAllegati.innerHTML = '<span class="text-sm text-gray-500">Nessun allegato</span>';
+	}
+
 	document.getElementById('dettaglioTimestamp').textContent = `Analizzata il ${formattaData(email.timestamp)}`;
 
 	modaleEmail.classList.remove('hidden');
@@ -105,6 +158,7 @@ function aggiornaListaEmail() {
 			(e) =>
 				e.destinatario.toLowerCase().includes(t) ||
 				e.mittente.toLowerCase().includes(t) ||
+				(e.oggetto || '').toLowerCase().includes(t) ||
 				(e.paroleChiave || []).some((p) => p.toLowerCase().includes(t)) ||
 				(e.categoria || '').toLowerCase().includes(t) ||
 				e.messaggio.toLowerCase().includes(t),
@@ -135,8 +189,21 @@ emailForm?.addEventListener('submit', async (e) => {
 
 	const mittente = mittenteInput.value.trim();
 	const destinatario = destinatarioInput.value.trim();
+	const oggetto = oggettoInput.value.trim();
 	const messaggio = messaggioInput.value.trim();
-	if (!mittente || !destinatario || !messaggio) return;
+	if (!mittente || !destinatario || !oggetto || !messaggio) return;
+
+	// Collect attachment file names from accumulated list
+	const nomiAllegati = allegatiAccumulati.map((f) => f.name);
+
+	// Read file contents as base64 data URLs
+	const allegatiData = await Promise.all(
+		allegatiAccumulati.map(async (f) => ({
+			name: f.name,
+			type: f.type,
+			data: await leggiFileBase64(f),
+		}))
+	);
 
 	inviaBtn.disabled = true;
 	inviaBtn.textContent = 'Analisi in corso...';
@@ -145,7 +212,7 @@ emailForm?.addEventListener('submit', async (e) => {
 		const res = await fetch('/api/analyze', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ mittente, destinatario, messaggio }),
+			body: JSON.stringify({ mittente, destinatario, oggetto, messaggio }),
 		});
 
 		if (!res.ok) throw new Error('Errore API');
@@ -186,11 +253,13 @@ emailForm?.addEventListener('submit', async (e) => {
 			body: JSON.stringify({
 				mittente,
 				destinatario,
+				oggetto,
 				messaggio,
 				timestamp: new Date().toISOString(),
 				categoria,
 				paroleChiave,
 				riassunto,
+				allegati: allegatiData,
 				classification,
 				semantic,
 				routing,
@@ -202,6 +271,8 @@ emailForm?.addEventListener('submit', async (e) => {
 		const nuovaEmail = saved.email;
 
 		emails.unshift(nuovaEmail);
+		allegatiAccumulati = [];
+		aggiornaListaAllegati();
 
 		categoriaSpan.textContent = nuovaEmail.categoria;
 		categoriaSpan.className = 'inline-block px-2 py-1 rounded text-xs bg-gray-500 text-white';
@@ -226,11 +297,38 @@ emailForm?.addEventListener('submit', async (e) => {
 resetBtn?.addEventListener('click', () => {
 	emailForm.reset();
 	charCount.textContent = '0';
+	allegatiAccumulati = [];
+	aggiornaListaAllegati();
 	risultatiAnalisi?.classList.add('hidden');
 });
 
 messaggioInput?.addEventListener('input', function () {
 	charCount.textContent = this.value.length;
+});
+
+function aggiornaListaAllegati() {
+	listaAllegatiDiv.innerHTML = '';
+	allegatiAccumulati.forEach((file, idx) => {
+		const badge = document.createElement('span');
+		badge.className = 'inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm';
+		badge.innerHTML = `<i class="fas fa-file text-gray-500"></i>${file.name}<button type="button" class="ml-1 text-gray-400 hover:text-red-500" data-idx="${idx}"><i class="fas fa-times text-xs"></i></button>`;
+		badge.querySelector('button').addEventListener('click', () => {
+			allegatiAccumulati.splice(idx, 1);
+			aggiornaListaAllegati();
+		});
+		listaAllegatiDiv.appendChild(badge);
+	});
+}
+
+allegatiInput?.addEventListener('change', function () {
+	for (const file of this.files) {
+		const giàPresente = allegatiAccumulati.some((f) => f.name === file.name && f.size === file.size);
+		if (!giàPresente) {
+			allegatiAccumulati.push(file);
+		}
+	}
+	this.value = '';
+	aggiornaListaAllegati();
 });
 
 ricercaInput?.addEventListener('input', function () {

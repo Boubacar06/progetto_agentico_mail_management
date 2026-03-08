@@ -142,16 +142,18 @@ def _run_frontend_server() -> None:
         data = request.get_json(force=True) or {}
         sender = data.get("mittente") or data.get("sender") or "user@example.com"
         recipient = data.get("destinatario") or data.get("recipient") or "support@example.com"
+        subject = data.get("oggetto") or data.get("subject") or "(nessun oggetto)"
         message = data.get("messaggio") or data.get("body") or ""
 
         logger.bind(request_id=request_id, source="frontend").info(
-            "analyze_email received | sender={} recipient={} chars={}",
+            "analyze_email received | sender={} recipient={} subject={} chars={}",
             sender,
             recipient,
+            subject,
             len(message),
         )
 
-        raw_email = f"From: {sender}\\nTo: {recipient}\\nSubject: Analisi da frontend\\n\\n{message}"
+        raw_email = f"From: {sender}\nTo: {recipient}\nSubject: {subject}\n\n{message}"
         state = SharedState(raw_email=raw_email)
         executor = get_executor()
         final_state = executor.run(state)
@@ -209,11 +211,13 @@ def _run_frontend_server() -> None:
             "id": payload.get("id") or str(uuid.uuid4()),
             "mittente": payload.get("mittente") or payload.get("sender") or "",
             "destinatario": payload.get("destinatario") or payload.get("recipient") or "",
+            "oggetto": payload.get("oggetto") or payload.get("subject") or "",
             "messaggio": payload.get("messaggio") or payload.get("body") or "",
             "timestamp": payload.get("timestamp") or now_iso,
             "categoria": payload.get("categoria"),
             "paroleChiave": payload.get("paroleChiave") or [],
             "riassunto": payload.get("riassunto"),
+            "allegati": payload.get("allegati") or [],
             "classification": payload.get("classification"),
             "semantic": payload.get("semantic"),
             "routing": payload.get("routing"),

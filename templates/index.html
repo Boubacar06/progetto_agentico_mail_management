@@ -77,6 +77,20 @@
             </div>
 
             <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Oggetto</label>
+              <div class="relative">
+                <i class="fas fa-heading absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input
+                  type="text"
+                  id="oggetto"
+                  placeholder="Oggetto dell'email"
+                  class="w-full border rounded-lg p-2 pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
               <div class="mb-1 flex items-center justify-between">
                 <label class="block text-sm font-medium text-gray-700">Messaggio</label>
                 <span class="text-sm text-gray-500">
@@ -90,6 +104,21 @@
                 maxlength="1000"
                 class="w-full border rounded-lg p-2"
               ></textarea>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Allegati</label>
+              <div class="relative">
+                <i class="fas fa-paperclip absolute left-3 top-3 text-gray-400"></i>
+                <input
+                  type="file"
+                  id="allegati"
+                  multiple
+                  class="w-full border rounded-lg p-2 pl-10 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Puoi selezionare più file</p>
+              <div id="listaAllegati" class="mt-2 flex flex-wrap gap-2"></div>
             </div>
 
             <div class="flex gap-3">
@@ -241,6 +270,11 @@
             <h3 class="text-sm font-medium text-gray-700">Destinatario</h3>
             <p id="dettaglioDestinatario" class="mt-1 text-gray-900"></p>
           </div>
+
+          <div>
+            <h3 class="text-sm font-medium text-gray-700">Oggetto</h3>
+            <p id="dettaglioOggetto" class="mt-1 text-gray-900"></p>
+          </div>
          
           <div>
             <h3 class="text-sm font-medium text-gray-700">Categoria</h3>
@@ -261,6 +295,13 @@
             <h3 class="text-sm font-medium text-gray-700">Messaggio</h3>
             <div class="mt-1 rounded-md bg-gray-50 p-4">
               <p id="dettaglioMessaggio" class="whitespace-pre-wrap text-gray-800"></p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-medium text-gray-700">Allegati</h3>
+            <div id="dettaglioAllegati" class="mt-1 flex flex-wrap gap-2">
+              <span class="text-sm text-gray-500">Nessun allegato</span>
             </div>
           </div>
          
