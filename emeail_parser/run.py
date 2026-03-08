@@ -278,16 +278,105 @@ from email_agents.prompt_logging import prompt_for_logs  # type: ignore
 # Fallback mock for development if no API key
 class DummyLLM:
     model_name = "dummy"
+
+    # Keyword lists for heuristic classification
+    _SPAM_KEYWORDS = [
+        "lottery", "win money", "congratulations you won", "free gift",
+        "click here", "act now", "limited time", "buy now", "unsubscribe",
+        "offerta speciale", "hai vinto", "clicca qui", "gratis",
+    ]
+    _DEPT_KEYWORDS = {
+        "IT": ["vpn", "password", "login", "server", "computer", "software",
+               "hardware", "rete", "accesso", "sistema", "errore", "bug"],
+        "HR": ["ferie", "stipendio", "contratto", "assunzione", "colloquio",
+               "vacancy", "salary", "leave", "hiring", "resume", "cv"],
+        "SALES": ["preventivo", "ordine", "cliente", "vendita", "prezzo",
+                  "quote", "order", "pricing", "deal", "proposal"],
+        "FINANCE": ["fattura", "pagamento", "rimborso", "budget", "invoice",
+                    "payment", "refund", "billing", "costo", "spesa"],
+    }
+    _URGENCY_KEYWORDS = {
+        "alta": ["urgente", "urgent", "asap", "immediately", "subito",
+                 "critico", "critical", "bloccato", "blocked", "emergency"],
+        "bassa": ["quando puoi", "no rush", "non urgente", "low priority",
+                  "a tuo comodo", "informativo", "fyi"],
+    }
+    _TONE_KEYWORDS = {
+        "formale": ["gentile", "cordiali saluti", "distinti saluti", "egregio",
+                    "dear", "regards", "sincerely", "spettabile"],
+        "informale": ["ciao", "hey", "ehi", "bella", "grazie mille", "a presto"],
+        "arrabbiato": ["inaccettabile", "scandaloso", "vergogna", "furioso",
+                       "unacceptable", "outrageous", "angry", "frustrated"],
+    }
+
+    def _match_any(self, text: str, keywords: list[str]) -> bool:
+        return any(kw in text for kw in keywords)
+
+    def _detect_department(self, text: str) -> str:
+        for dept, kws in self._DEPT_KEYWORDS.items():
+            if self._match_any(text, kws):
+                return dept
+        return "SUPPORT"
+
+    def _detect_tone(self, text: str) -> str:
+        for tone, kws in self._TONE_KEYWORDS.items():
+            if self._match_any(text, kws):
+                return tone
+        return "neutrale"
+
+    def _detect_urgency(self, text: str) -> str:
+        for urg, kws in self._URGENCY_KEYWORDS.items():
+            if self._match_any(text, kws):
+                return urg
+        return "media"
+
     def invoke(self, prompt: str):
+        import re as _re
         lower = prompt.lower()
+
+        # --- Spam classification ---
         if "classify" in lower:
-            if "lottery" in lower or "win money" in lower:
-                return type("Resp", (), {"content": '{"is_spam": true, "confidence": 0.95}'})()
-            return type("Resp", (), {"content": '{"is_spam": false, "confidence": 0.82}'})()
+            is_spam = self._match_any(lower, self._SPAM_KEYWORDS)
+            confidence = 0.92 if is_spam else 0.85
+            return type("Resp", (), {"content": json.dumps(
+                {"is_spam": is_spam, "confidence": confidence}
+            )})()
+
+        # --- Routing ---
         if "decide best department" in lower:
-            dept = "IT" if ("vpn" in lower or "access" in lower) else "SUPPORT"
-            return type("Resp", (), {"content": f'{{"department": "{dept}", "rationale": "keyword heuristic"}}'})()
-        return type("Resp", (), {"content": '{"intent": "support_request", "tone": "neutral", "urgency": "medium", "summary": "User needs assistance"}'})()
+            dept = self._detect_department(lower)
+            return type("Resp", (), {"content": json.dumps(
+                {"department": dept, "rationale": "keyword heuristic"}
+            )})()
+
+        # --- Semantic analysis ---
+        # Build a content-aware summary from the body
+        body_match = _re.search(r"body:\s*(.+)", lower, _re.DOTALL)
+        body_snippet = (body_match.group(1).strip()[:120] + "...") if body_match else ""
+        subject_match = _re.search(r"subject:\s*(.+?)(?:\n|$)", lower)
+        subject_snippet = subject_match.group(1).strip() if subject_match else ""
+
+        tone = self._detect_tone(lower)
+        urgency = self._detect_urgency(lower)
+
+        # Determine intent from keywords
+        if self._match_any(lower, ["aiuto", "help", "problema", "problem", "errore", "error", "non riesco", "cannot"]):
+            intent = "richiesta_di_assistenza"
+        elif self._match_any(lower, ["informazione", "info", "domanda", "question", "sapere", "know"]):
+            intent = "richiesta_informazioni"
+        elif self._match_any(lower, ["reclamo", "complaint", "lamentela", "insoddisfatto"]):
+            intent = "reclamo"
+        elif self._match_any(lower, ["grazie", "thank", "conferma", "confirm"]):
+            intent = "conferma"
+        else:
+            intent = "comunicazione_generica"
+
+        summary = subject_snippet if subject_snippet else (body_snippet if body_snippet else "Nessun contenuto rilevante")
+
+        return type("Resp", (), {"content": json.dumps(
+            {"intent": intent, "tone": tone, "urgency": urgency, "summary": summary},
+            ensure_ascii=False,
+        )})()
 
 
 class OpenAILLM:

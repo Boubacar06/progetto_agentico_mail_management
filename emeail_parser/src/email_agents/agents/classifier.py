@@ -1,8 +1,8 @@
 from typing import Dict
-import json
 from ..shared_state import SharedState, ClassificationResult
 from ..prompts import spam_classifier_prompt
 from ..prompt_logging import prompt_for_logs, should_log_prompts
+from ..json_utils import extract_json
 from loguru import logger
 
 class SpamClassifierAgent:
@@ -23,9 +23,8 @@ class SpamClassifierAgent:
         response = getattr(self.llm, "invoke", lambda x: self.llm.predict(x))(prompt)
         content = getattr(response, "content", response)
         logger.info("[MODEL_OUTPUT][{}] {}", self.name, content)
-        try:
-            data = json.loads(content)
-        except json.JSONDecodeError:
+        data = extract_json(content)
+        if not data:
             data = {"is_spam": False, "confidence": 0.0}
         model_name = getattr(self.llm, "model_name", "unknown")
         logger.info("Classifier response | is_spam={} confidence={} model={}", data.get("is_spam"), data.get("confidence"), model_name)

@@ -283,5 +283,137 @@
       "rationale": "default"
     },
     "request_id": "5a552cfd-714a-4c36-9419-e6f762268ffa"
+  },
+  {
+    "id": "fa77490b-1ad5-4a2c-ab5a-b3ee0125e408",
+    "mittente": "hhggt56@gmail.com",
+    "destinatario": "ggtny45@gmail.conm",
+    "oggetto": "richiesta di supporto",
+    "messaggio": "scrivo per proporre l’avvio di un test tecnico su un’architettura agentica, con l’obiettivo di valutarne il funzionamento, l’affidabilità e le possibili applicazioni nel nostro contesto operativo.\n\nL’idea è effettuare una prova controllata, così da analizzare in modo concreto le prestazioni del sistema, i requisiti tecnici necessari e gli eventuali vantaggi in termini di automazione ed efficienza.\n\nResto a disposizione per fornire maggiori dettagli sul test, sugli obiettivi previsti e sulle modalità di esecuzione, nel caso in cui vogliate approfondire la proposta.\n\nGrazie per l’attenzione.\n\nCordiali saluti,",
+    "timestamp": "2026-03-08T11:05:41.539Z",
+    "categoria": "Importante",
+    "paroleChiave": [
+      "Proposta di test tecnico",
+      "Formale",
+      "Bassa"
+    ],
+    "riassunto": "L'utente propone l'avvio di un test tecnico su un'architettura agentica per valutarne il funzionamento e le possibili applicazioni nel contesto operativo.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:8b"
+    },
+    "semantic": {
+      "intent": "Proposta di test tecnico",
+      "model": "llama3.1:8b",
+      "summary": "L'utente propone l'avvio di un test tecnico su un'architettura agentica per valutarne il funzionamento e le possibili applicazioni nel contesto operativo.",
+      "tone": "Formale",
+      "urgency": "Bassa"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "default"
+    },
+    "request_id": "e22ddd07-555a-44de-ae0b-ad7da99d8de5"
+  },
+  {
+    "id": "7e7767db-52b6-4a79-9533-721278510d39",
+    "mittente": "luca.bianchi87@gmail.com",
+    "destinatario": "hr@aziendaexample.it",
+    "oggetto": "Richiesta chiarimento su procedura interna e aggiornamento dati",
+    "messaggio": "Gentili,\n\nvi scrivo perché negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l’aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale.\n\nNon mi è però del tutto chiaro se l’aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano già compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato.\n\nInoltre, volevo capire se l’eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l’invio di documentazione aggiuntiva oppure se è sufficiente aggiornare le informazioni direttamente n",
+    "timestamp": "2026-03-08T11:27:00.189Z",
+    "categoria": "SUPPORT",
+    "paroleChiave": [
+      "Richiesta chiarimento su procedura interna",
+      "Formale, cauto",
+      "Media"
+    ],
+    "riassunto": "Il destinatario richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale, in particolare se debba essere effettuato da tutti o solo da alcune categorie di dipendenti.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:8b"
+    },
+    "semantic": {
+      "intent": "Richiesta chiarimento su procedura interna",
+      "model": "llama3.1:8b",
+      "summary": "Il destinatario richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale, in particolare se debba essere effettuato da tutti o solo da alcune categorie di dipendenti.",
+      "tone": "Formale, cauto",
+      "urgency": "Media"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "default"
+    },
+    "request_id": "4d2efe4f-74b7-4029-b123-5e823d144e0b"
+  },
+  {
+    "id": "55a8660c-8af5-4a79-a3c3-4b40c9bca973",
+    "mittente": "luca.bianchi87@gmail.com",
+    "destinatario": "hr@aziendaexample.it",
+    "oggetto": "Richiesta chiarimento su procedura interna e aggiornamento dati",
+    "messaggio": "Gentili,\n\nvi scrivo perché negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l’aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale.\n\nNon mi è però del tutto chiaro se l’aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano già compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato.\n\nInoltre, volevo capire se l’eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l’invio di documentazione aggiuntiva oppure se è sufficiente aggiornare le informazioni direttamente nel sistema.\n\nNon si tratta di una richiesta urgente, ma preferirei assicurarmi di seguire la procedura corretta prima della scadenza indicata nella comunicazione interna.\n\nGrazie",
+    "timestamp": "2026-03-08T11:47:38.257Z",
+    "categoria": "HR",
+    "paroleChiave": [
+      "richiesta_informazioni",
+      "formale",
+      "bassa"
+    ],
+    "riassunto": "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei dati di contatto.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0.95,
+      "is_spam": false,
+      "model": "llama3.1:8b"
+    },
+    "semantic": {
+      "intent": "richiesta_informazioni",
+      "model": "llama3.1:8b",
+      "summary": "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei dati di contatto.",
+      "tone": "formale",
+      "urgency": "bassa"
+    },
+    "routing": {
+      "department": "HR",
+      "rationale": "La richiesta di chiarimento riguarda la procedura interna per l'aggiornamento dei dati dei dipendenti, quindi è più probabile che sia un problema di HR."
+    },
+    "request_id": "f754be31-23ee-46cd-8083-48915250608f"
+  },
+  {
+    "id": "21c32d8f-6195-4c7f-b27c-bbfdd0e7a697",
+    "mittente": "luca.bianchi87@gmail.com",
+    "destinatario": "nadia@aziendaexample.it",
+    "oggetto": "Richiesta chiarimento su procedura interna e aggiornamento dati",
+    "messaggio": "Gentili,\n\nvi scrivo perché negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l’aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale.\n\nNon mi è però del tutto chiaro se l’aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano già compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato.\n\nInoltre, volevo capire se l’eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l’invio di documentazione aggiuntiva oppure se è sufficiente aggiornare le informazioni direttamente nel sistema.\n\nGrazie",
+    "timestamp": "2026-03-08T11:49:57.668Z",
+    "categoria": "HR",
+    "paroleChiave": [
+      "richiesta_informazioni",
+      "formale",
+      "bassa"
+    ],
+    "riassunto": "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei propri dati.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0.95,
+      "is_spam": false,
+      "model": "llama3.1:8b"
+    },
+    "semantic": {
+      "intent": "richiesta_informazioni",
+      "model": "llama3.1:8b",
+      "summary": "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei propri dati.",
+      "tone": "formale",
+      "urgency": "bassa"
+    },
+    "routing": {
+      "department": "HR",
+      "rationale": "La richiesta di chiarimento riguarda la procedura interna per l'aggiornamento dei dati dei dipendenti, quindi è più probabile che sia un problema di HR."
+    },
+    "request_id": "c1e4772c-62b2-4c83-bffe-d419b6ee8d3d"
   }
 ]

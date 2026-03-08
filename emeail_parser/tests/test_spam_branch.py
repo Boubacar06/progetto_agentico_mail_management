@@ -8,7 +8,7 @@ class DummyLLM:
     model_name = "dummy"
     def invoke(self, prompt: str):
         # Force spam on classifier prompt
-        if "Classify" in prompt:
+        if "anti-spam" in prompt:
             return type("Resp", (), {"content": '{"is_spam": true, "confidence": 0.9}'})()
         return type("Resp", (), {"content": '{}'})()
 

@@ -638,3 +638,264 @@ Risposta in JSON:
 ```
 2026-03-08 11:49:27.860 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'SUPPORT'}
 2026-03-08 11:49:27.861 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'router', 'to_agent': 'END', 'department': 'SUPPORT'}
+2026-03-08 11:59:19.993 | INFO     | logging_setup:configure_logging:51 | Loguru configured. Log directory: C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-08 11:59:23.752 | WARNING  | __main__:_run_frontend_server:107 | Root app import failed, using fallback server: No module named 'app'
+2026-03-08 11:59:24.238 | INFO     | __main__:_run_frontend_server:245 | Starting fallback app server | url=http://127.0.0.1:3000/ log_dir=C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-08 12:03:41.706 | INFO     | __main__:analyze_email:148 | analyze_email received | sender=hhggt56@gmail.com recipient=ggtny45@gmail.conm subject=richiesta di supporto chars=614
+2026-03-08 12:03:41.709 | INFO     | __main__:_build_llm:474 | Using Ollama model 'llama3.1:8b' at http://127.0.0.1:11434
+2026-03-08 12:03:41.735 | INFO     | email_agents.shared_state:log:59 | orchestrator:start {'entry_point': 'parse'}
+2026-03-08 12:03:41.735 | INFO     | email_agents.shared_state:log:59 | parser:parsed {'subject': 'richiesta di supporto'}
+2026-03-08 12:03:41.738 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'parser', 'to_agent': 'spam_classifier', 'subject': 'richiesta di supporto', 'body_length': 635}
+2026-03-08 12:03:41.738 | INFO     | email_agents.agents.classifier:run:22 | [PROMPT][spam_classifier] Classify the following email strictly as SPAM or HAM (not spam).
+Return JSON with keys: is_spam (true/false), confidence (0-1).
+Subject: richiesta di supporto
+Body: scrivo per proporre l\u2019avvio di un test tecnico su un\u2019architettura agentica, con l\u2019obiettivo di valutarne il funzionamento, l\u2019affidabilit e le possibili applicazioni nel nostro contesto operativo. L\u2019idea effettuare una prova controllata, cos da analizzare in modo concreto le prestazioni del sistema, i requisiti tecnici necessari e gli eventuali vantaggi in termini di automazione ed efficienza. Resto a disposizione per fornire maggiori dettagli sul test, sugli obiettivi previsti e sulle modalit di esecuzione, nel caso in cui vogliate approfondire la proposta. Grazie per l\u2019attenzione. Cordiali saluti,
+Always respond in Italian regardless the language of the email.
+2026-03-08 12:04:32.299 | INFO     | email_agents.agents.classifier:run:25 | [MODEL_OUTPUT][spam_classifier] **Classificazione:** HAM
+
+**Risposta:**
+
+La tua email sembra essere una richiesta di supporto tecnico legittima, che richiede l'avvio di un test tecnico su un'architettura agentica per valutarne il funzionamento e le possibili applicazioni nel tuo contesto operativo. La tua richiesta è chiara e specifica, e non contiene elementi di spam o phishing.
+
+**Valutazione della confidenza:** 0,9 (9/10)
+
+La tua email è stata classificata come HAM perché:
+
+* La richiesta è specifica e chiara
+* Non contiene elementi di spam o phishing
+* La tua identità e il tuo contesto operativo sono impliciti nella richiesta
+* La tua email non contiene link o allegati sospetti
+* La tua richiesta è coerente con il contesto del tuo lavoro o delle tue responsabilità.
+2026-03-08 12:04:32.299 | INFO     | email_agents.agents.classifier:run:30 | Classifier response | is_spam=False confidence=0.0 model=llama3.1:8b
+2026-03-08 12:04:32.306 | INFO     | email_agents.shared_state:log:59 | spam_classifier:classified {'is_spam': False, 'confidence': 0.0}
+2026-03-08 12:04:32.306 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'spam_classifier', 'to_agent': 'semantic_analyzer', 'decision': 'ham', 'confidence': 0.0}
+2026-03-08 12:04:32.309 | INFO     | email_agents.agents.semantic_analyzer:run:24 | [PROMPT][semantic_analyzer] You analyze intent, tone, urgency. Respond in JSON. Always respond in Italian regardless the language of the email.
+Email subject: richiesta di supporto
+Body: scrivo per proporre l\u2019avvio di un test tecnico su un\u2019architettura agentica, con l\u2019obiettivo di valutarne il funzionamento, l\u2019affidabilit e le possibili applicazioni nel nostro contesto operativo. L\u2019idea effettuare una prova controllata, cos da analizzare in modo concreto le prestazioni del sistema, i requisiti tecnici necessari e gli eventuali vantaggi in termini di automazione ed efficienza. Resto a disposizione per fornire maggiori dettagli sul test, sugli obiettivi previsti e sulle modalit di esecuzione, nel caso in cui vogliate approfondire la proposta. Grazie per l\u2019attenzione. Cordiali saluti,
+Provide fields: intent, tone, urgency, summary. Always respond in Italian regardless the language of the email.
+2026-03-08 12:05:11.085 | INFO     | email_agents.agents.semantic_analyzer:run:27 | [MODEL_OUTPUT][semantic_analyzer] Ecco la mia analisi:
+
+```
+{
+  "intent": "Proposta di test tecnico",
+  "tone": "Formale",
+  "urgency": "Bassa",
+  "summary": "L'utente propone l'avvio di un test tecnico su un'architettura agentica per valutarne il funzionamento e le possibili applicazioni nel contesto operativo."
+}
+```
+
+Nota: L'intento è "Proposta di test tecnico" perché l'utente sta presentando un'idea per un test tecnico, il tono è "Formale" perché l'utente utilizza un linguaggio professionale e formale, l'urgenza è "Bassa" perché l'utente non richiede un'azione immediata e il riassunto è una breve descrizione dell'intento principale dell'email.
+2026-03-08 12:05:11.085 | INFO     | email_agents.shared_state:log:59 | semantic_analyzer:semantic {'intent': 'Proposta di test tecnico', 'tone': 'Formale', 'urgency': 'Bassa', 'summary': "L'utente propone l'avvio di un test tecnico su un'architettura agentica per valutarne il funzionamento e le possibili applicazioni nel contesto operativo."}
+2026-03-08 12:05:11.087 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'semantic_analyzer', 'to_agent': 'router', 'intent': 'Proposta di test tecnico', 'tone': 'Formale', 'urgency': 'Bassa'}
+2026-03-08 12:05:11.087 | INFO     | email_agents.agents.router:run:26 | [PROMPT][router] Decide best department for this email among: HR, IT, SALES, FINANCE, SUPPORT.
+Return JSON with keys: department, rationale.
+Intent: Proposta di test tecnico | Tone: Formale | Urgency: Bassa
+Subject: richiesta di supporto
+Body: scrivo per proporre l\u2019avvio di un test tecnico su un\u2019architettura agentica, con l\u2019obiettivo di valutarne il funzionamento, l\u2019affidabilit e le possibili applicazioni nel nostro contesto operativo. L\u2019idea effettuare una prova controllata, cos da analizzare in modo concreto le prestazioni del sistema, i requisiti tecnici necessari e gli eventuali vantaggi in termini di automazione ed efficienza. Resto a disposizione per fornire maggiori dettagli sul test, sugli obiettivi previsti e sulle modalit di esecuzione, nel caso in cui vogliate approfondire la proposta. Grazie per l\u2019attenzione. Cordiali saluti,
+Always respond in Italian regardless the language of the email.
+2026-03-08 12:05:41.525 | INFO     | email_agents.agents.router:run:29 | [MODEL_OUTPUT][router] Il miglior dipartimento per questo email è: SUPPORT
+
+Ragione: l'email è una richiesta di supporto per l'avvio di un test tecnico e richiede informazioni e approfondimenti sulla proposta. Il tono è formale e non c'è urgenza, quindi è più probabile che sia un richiesta di supporto tecnico piuttosto che un'opportunità di vendita o un problema finanziario.
+2026-03-08 12:05:41.525 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'SUPPORT'}
+2026-03-08 12:05:41.525 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'router', 'to_agent': 'END', 'department': 'SUPPORT'}
+2026-03-08 12:05:41.534 | INFO     | __main__:analyze_email:174 | analyze_email completed | status=routed history_entries=9
+2026-03-08 12:20:35.336 | INFO     | logging_setup:configure_logging:51 | Loguru configured. Log directory: C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-08 12:20:39.321 | WARNING  | __main__:_run_frontend_server:107 | Root app import failed, using fallback server: No module named 'app'
+2026-03-08 12:20:39.832 | INFO     | __main__:_run_frontend_server:245 | Starting fallback app server | url=http://127.0.0.1:3000/ log_dir=C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-08 12:24:53.923 | INFO     | __main__:analyze_email:148 | analyze_email received | sender=luca.bianchi87@gmail.com recipient=hr@aziendaexample.it subject=Richiesta chiarimento su procedura interna e aggiornamento dati chars=819
+2026-03-08 12:24:53.929 | INFO     | __main__:_build_llm:474 | Using Ollama model 'llama3.1:8b' at http://127.0.0.1:11434
+2026-03-08 12:24:53.958 | INFO     | email_agents.shared_state:log:59 | orchestrator:start {'entry_point': 'parse'}
+2026-03-08 12:24:53.958 | INFO     | email_agents.shared_state:log:59 | parser:parsed {'subject': 'Richiesta chiarimento su procedura interna e aggiornamento dati'}
+2026-03-08 12:24:53.958 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'parser', 'to_agent': 'spam_classifier', 'subject': 'Richiesta chiarimento su procedura interna e aggiornamento dati', 'body_length': 829}
+2026-03-08 12:24:53.958 | INFO     | email_agents.agents.classifier:run:22 | [PROMPT][spam_classifier] Classify the following email strictly as SPAM or HAM (not spam).
+Return JSON with keys: is_spam (true/false), confidence (0-1).
+Subject: Richiesta chiarimento su procedura interna e aggiornamento dati
+Body: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente n
+Always respond in Italian regardless the language of the email.
+2026-03-08 12:25:47.254 | INFO     | email_agents.agents.classifier:run:25 | [MODEL_OUTPUT][spam_classifier] **Risposta:**
+La classificazione di questo messaggio è: HAM (non SPAM)
+
+**Motivazioni:**
+
+* Il messaggio è scritto in italiano e sembra essere una richiesta di chiarimento su una procedura interna di un'azienda.
+* Il contenuto del messaggio è coerente e non contiene link o allegati sospetti.
+* La lingua e lo stile del messaggio sono simili a quelli di un messaggio interno di un'azienda.
+* Non ci sono elementi di SPAM come richieste di acquisto, offerte di investimenti o richieste di informazioni personali.
+
+**Valutazione della confidenza:**
+La confidenza è alta (0,9) poiché il messaggio sembra essere una richiesta legittima di chiarimento su una procedura interna di un'azienda.
+2026-03-08 12:25:47.254 | INFO     | email_agents.agents.classifier:run:30 | Classifier response | is_spam=False confidence=0.0 model=llama3.1:8b
+2026-03-08 12:25:47.263 | INFO     | email_agents.shared_state:log:59 | spam_classifier:classified {'is_spam': False, 'confidence': 0.0}
+2026-03-08 12:25:47.263 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'spam_classifier', 'to_agent': 'semantic_analyzer', 'decision': 'ham', 'confidence': 0.0}
+2026-03-08 12:25:47.266 | INFO     | email_agents.agents.semantic_analyzer:run:24 | [PROMPT][semantic_analyzer] You analyze intent, tone, urgency. Respond in JSON. Always respond in Italian regardless the language of the email.
+Email subject: Richiesta chiarimento su procedura interna e aggiornamento dati
+Body: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente n
+Provide fields: intent, tone, urgency, summary. Always respond in Italian regardless the language of the email.
+2026-03-08 12:26:26.512 | INFO     | email_agents.agents.semantic_analyzer:run:27 | [MODEL_OUTPUT][semantic_analyzer] Ecco l'analisi dell'email:
+
+```
+{
+  "intent": "Richiesta chiarimento su procedura interna",
+  "tone": "Formale, cauto",
+  "urgency": "Media",
+  "summary": "Il destinatario richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale, in particolare se debba essere effettuato da tutti o solo da alcune categorie di dipendenti."
+}
+```
+
+Nota: L'intento è di richiedere chiarimenti, il tono è formale e cauto, l'urgenza è media in quanto il destinatario non sembra avere una scadenza specifica per l'aggiornamento dei dati. La sintesi è una breve descrizione dell'intento principale dell'email.
+2026-03-08 12:26:26.512 | INFO     | email_agents.shared_state:log:59 | semantic_analyzer:semantic {'intent': 'Richiesta chiarimento su procedura interna', 'tone': 'Formale, cauto', 'urgency': 'Media', 'summary': 'Il destinatario richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale, in particolare se debba essere effettuato da tutti o solo da alcune categorie di dipendenti.'}
+2026-03-08 12:26:26.512 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'semantic_analyzer', 'to_agent': 'router', 'intent': 'Richiesta chiarimento su procedura interna', 'tone': 'Formale, cauto', 'urgency': 'Media'}
+2026-03-08 12:26:26.512 | INFO     | email_agents.agents.router:run:26 | [PROMPT][router] Decide best department for this email among: HR, IT, SALES, FINANCE, SUPPORT.
+Return JSON with keys: department, rationale.
+Intent: Richiesta chiarimento su procedura interna | Tone: Formale, cauto | Urgency: Media
+Subject: Richiesta chiarimento su procedura interna e aggiornamento dati
+Body: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente n
+Always respond in Italian regardless the language of the email.
+2026-03-08 12:27:00.174 | INFO     | email_agents.agents.router:run:29 | [MODEL_OUTPUT][router] Il miglior dipartimento per questo email è il SUPPORT.
+
+Ragione: l'email è una richiesta di chiarimento su una procedura interna e richiede assistenza per comprendere come procedere con l'aggiornamento dei dati. Il tono è formale e cauto, ma non c'è una richiesta di azione immediata, quindi non è una questione di urgenza. Il SUPPORT è il dipartimento che si occupa di fornire assistenza e supporto ai dipendenti, quindi è il più adatto per gestire questa richiesta.
+2026-03-08 12:27:00.174 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'SUPPORT'}
+2026-03-08 12:27:00.174 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'router', 'to_agent': 'END', 'department': 'SUPPORT'}
+2026-03-08 12:27:00.184 | INFO     | __main__:analyze_email:174 | analyze_email completed | status=routed history_entries=9
+2026-03-08 12:43:37.412 | INFO     | logging_setup:configure_logging:51 | Loguru configured. Log directory: C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-08 12:43:40.338 | WARNING  | __main__:_run_frontend_server:107 | Root app import failed, using fallback server: No module named 'app'
+2026-03-08 12:43:40.667 | INFO     | __main__:_run_frontend_server:245 | Starting fallback app server | url=http://127.0.0.1:3000/ log_dir=C:\Users\bouba\Documents\Scuola\progetto_agentico_mail_management\logs
+2026-03-08 12:45:55.737 | INFO     | __main__:analyze_email:148 | analyze_email received | sender=luca.bianchi87@gmail.com recipient=hr@aziendaexample.it subject=Richiesta chiarimento su procedura interna e aggiornamento dati chars=997
+2026-03-08 12:45:55.739 | INFO     | __main__:_build_llm:474 | Using Ollama model 'llama3.1:8b' at http://127.0.0.1:11434
+2026-03-08 12:45:55.751 | INFO     | email_agents.shared_state:log:59 | orchestrator:start {'entry_point': 'parse'}
+2026-03-08 12:45:55.753 | INFO     | email_agents.shared_state:log:59 | parser:parsed {'subject': 'Richiesta chiarimento su procedura interna e aggiornamento dati'}
+2026-03-08 12:45:55.754 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'parser', 'to_agent': 'spam_classifier', 'subject': 'Richiesta chiarimento su procedura interna e aggiornamento dati', 'body_length': 1005}
+2026-03-08 12:45:55.754 | INFO     | email_agents.agents.classifier:run:22 | [PROMPT][spam_classifier] Sei un classificatore anti-spam. Analizza l'email seguente e stabilisci se è SPAM o HAM (non spam).
+Considera come indicatori di spam: link sospetti, offerte troppo vantaggiose, richieste di dati personali, mittenti sconosciuti con contenuti generici, linguaggio pressante o ingannevole.
+Considera come HAM: comunicazioni personali, lavorative, richieste legittime, risposte a conversazioni esistenti.
+
+Subject: Richiesta chiarimento su procedura interna e aggiornamento dati
+Body: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente nel sistema. Non si tratta di una richiesta urgente, ma preferirei assicurarmi di seguire la procedura corretta prima della scadenza indicata nella comunicazione interna. Grazie
+
+Rispondi SOLO con un JSON valido con le chiavi: is_spam (true/false), confidence (numero tra 0 e 1).
+Esempio: {"is_spam": false, "confidence": 0.95}
+Rispondi sempre in italiano.
+2026-03-08 12:46:24.113 | INFO     | email_agents.agents.classifier:run:25 | [MODEL_OUTPUT][spam_classifier] {"is_spam": false, "confidence": 0.95}
+2026-03-08 12:46:24.113 | INFO     | email_agents.agents.classifier:run:30 | Classifier response | is_spam=False confidence=0.95 model=llama3.1:8b
+2026-03-08 12:46:24.121 | INFO     | email_agents.shared_state:log:59 | spam_classifier:classified {'is_spam': False, 'confidence': 0.95}
+2026-03-08 12:46:24.121 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'spam_classifier', 'to_agent': 'semantic_analyzer', 'decision': 'ham', 'confidence': 0.95}
+2026-03-08 12:46:24.124 | INFO     | email_agents.agents.semantic_analyzer:run:24 | [PROMPT][semantic_analyzer] Sei un analizzatore semantico di email. Il tuo compito è estrarre intent, tone, urgency e summary dall'email fornita.
+Valori possibili per intent: richiesta_informazioni, richiesta_supporto, reclamo, candidatura, proposta_commerciale, comunicazione_interna, fatturazione, segnalazione_bug, richiesta_preventivo, saluto, altro.
+Valori possibili per tone: formale, informale, arrabbiato, urgente, neutro, amichevole, minaccioso.
+Valori possibili per urgency: alta, media, bassa.
+Il campo summary deve essere una breve sintesi in italiano del contenuto dell'email (max 2 frasi).
+
+Rispondi SOLO con un JSON valido con le chiavi: intent, tone, urgency, summary.
+Rispondi sempre in italiano.
+Oggetto: Richiesta chiarimento su procedura interna e aggiornamento dati
+Corpo: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente nel sistema. Non si tratta di una richiesta urgente, ma preferirei assicurarmi di seguire la procedura corretta prima della scadenza indicata nella comunicazione interna. Grazie
+
+2026-03-08 12:46:56.604 | INFO     | email_agents.agents.semantic_analyzer:run:27 | [MODEL_OUTPUT][semantic_analyzer] ```json
+{
+  "intent": "richiesta_informazioni",
+  "tone": "formale",
+  "urgency": "bassa",
+  "summary": "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei dati di contatto."
+}
+```
+2026-03-08 12:46:56.604 | INFO     | email_agents.shared_state:log:59 | semantic_analyzer:semantic {'intent': 'richiesta_informazioni', 'tone': 'formale', 'urgency': 'bassa', 'summary': "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei dati di contatto."}
+2026-03-08 12:46:56.604 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'semantic_analyzer', 'to_agent': 'router', 'intent': 'richiesta_informazioni', 'tone': 'formale', 'urgency': 'bassa'}
+2026-03-08 12:46:56.606 | INFO     | email_agents.agents.router:run:29 | [PROMPT][router] Sei un sistema di smistamento email aziendale. Devi assegnare l'email al reparto più appropriato.
+
+REPARTI DISPONIBILI E CRITERI:
+- HR: candidature, curriculum, colloqui, assunzioni, ferie, permessi, buste paga, questioni del personale.
+- IT: problemi tecnici, segnalazioni bug, richieste software/hardware, accessi, sistemi informatici, infrastruttura.
+- SALES: proposte commerciali, richieste preventivo, offerte, partnership, nuovi clienti, trattative di vendita.
+- FINANCE: fatture, pagamenti, rimborsi, contabilità, bilanci, questioni fiscali, solleciti di pagamento.
+- SUPPORT: SOLO per richieste di assistenza generica che NON rientrano chiaramente in nessuno dei reparti precedenti. Usa SUPPORT come ultima risorsa quando il contenuto è troppo vago o generico per essere assegnato a un reparto specifico.
+
+INFORMAZIONI EMAIL:
+Mittente: luca.bianchi87@gmail.com
+Destinatari: hr@aziendaexample.it
+Oggetto: Richiesta chiarimento su procedura interna e aggiornamento dati
+Corpo: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente nel sistema. Non si tratta di una richiesta urgente, ma preferirei assicurarmi di seguire la procedura corretta prima della scadenza indicata nella comunicazione interna. Grazie
+
+ANALISI SEMANTICA:
+Intent: richiesta_informazioni | Tono: formale | Urgenza: bassa
+
+ISTRUZIONI:
+1. Considera il destinatario: se l'email è indirizzata a un indirizzo di reparto specifico (es. hr@, vendite@, contabilita@, it@, sales@, finance@), dai priorità a quel reparto.
+2. Analizza il contenuto e l'intent per determinare il reparto corretto.
+3. Assegna SUPPORT solo se l'email non è chiaramente classificabile in nessun altro reparto.
+
+Rispondi SOLO con un JSON valido con le chiavi: department (uno tra HR, IT, SALES, FINANCE, SUPPORT), rationale (breve motivazione in italiano della scelta).
+Esempio: {"department": "IT", "rationale": "L'email segnala un problema tecnico con il software aziendale."}
+
+2026-03-08 12:47:38.250 | INFO     | email_agents.agents.router:run:32 | [MODEL_OUTPUT][router] {"department": "HR", "rationale": "La richiesta di chiarimento riguarda la procedura interna per l'aggiornamento dei dati dei dipendenti, quindi è più probabile che sia un problema di HR."}
+2026-03-08 12:47:38.250 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'HR'}
+2026-03-08 12:47:38.250 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'router', 'to_agent': 'END', 'department': 'HR'}
+2026-03-08 12:47:38.253 | INFO     | __main__:analyze_email:174 | analyze_email completed | status=routed history_entries=9
+2026-03-08 12:48:23.002 | INFO     | __main__:analyze_email:148 | analyze_email received | sender=luca.bianchi87@gmail.com recipient=nadia@aziendaexample.it subject=Richiesta chiarimento su procedura interna e aggiornamento dati chars=838
+2026-03-08 12:48:23.004 | INFO     | email_agents.shared_state:log:59 | orchestrator:start {'entry_point': 'parse'}
+2026-03-08 12:48:23.005 | INFO     | email_agents.shared_state:log:59 | parser:parsed {'subject': 'Richiesta chiarimento su procedura interna e aggiornamento dati'}
+2026-03-08 12:48:23.005 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'parser', 'to_agent': 'spam_classifier', 'subject': 'Richiesta chiarimento su procedura interna e aggiornamento dati', 'body_length': 847}
+2026-03-08 12:48:23.006 | INFO     | email_agents.agents.classifier:run:22 | [PROMPT][spam_classifier] Sei un classificatore anti-spam. Analizza l'email seguente e stabilisci se è SPAM o HAM (non spam).
+Considera come indicatori di spam: link sospetti, offerte troppo vantaggiose, richieste di dati personali, mittenti sconosciuti con contenuti generici, linguaggio pressante o ingannevole.
+Considera come HAM: comunicazioni personali, lavorative, richieste legittime, risposte a conversazioni esistenti.
+
+Subject: Richiesta chiarimento su procedura interna e aggiornamento dati
+Body: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente nel sistema. Grazie
+
+Rispondi SOLO con un JSON valido con le chiavi: is_spam (true/false), confidence (numero tra 0 e 1).
+Esempio: {"is_spam": false, "confidence": 0.95}
+Rispondi sempre in italiano.
+2026-03-08 12:48:44.947 | INFO     | email_agents.agents.classifier:run:25 | [MODEL_OUTPUT][spam_classifier] {"is_spam": false, "confidence": 0.95}
+2026-03-08 12:48:44.947 | INFO     | email_agents.agents.classifier:run:30 | Classifier response | is_spam=False confidence=0.95 model=llama3.1:8b
+2026-03-08 12:48:44.947 | INFO     | email_agents.shared_state:log:59 | spam_classifier:classified {'is_spam': False, 'confidence': 0.95}
+2026-03-08 12:48:44.947 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'spam_classifier', 'to_agent': 'semantic_analyzer', 'decision': 'ham', 'confidence': 0.95}
+2026-03-08 12:48:44.949 | INFO     | email_agents.agents.semantic_analyzer:run:24 | [PROMPT][semantic_analyzer] Sei un analizzatore semantico di email. Il tuo compito è estrarre intent, tone, urgency e summary dall'email fornita.
+Valori possibili per intent: richiesta_informazioni, richiesta_supporto, reclamo, candidatura, proposta_commerciale, comunicazione_interna, fatturazione, segnalazione_bug, richiesta_preventivo, saluto, altro.
+Valori possibili per tone: formale, informale, arrabbiato, urgente, neutro, amichevole, minaccioso.
+Valori possibili per urgency: alta, media, bassa.
+Il campo summary deve essere una breve sintesi in italiano del contenuto dell'email (max 2 frasi).
+
+Rispondi SOLO con un JSON valido con le chiavi: intent, tone, urgency, summary.
+Rispondi sempre in italiano.
+Oggetto: Richiesta chiarimento su procedura interna e aggiornamento dati
+Corpo: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente nel sistema. Grazie
+
+2026-03-08 12:49:17.571 | INFO     | email_agents.agents.semantic_analyzer:run:27 | [MODEL_OUTPUT][semantic_analyzer] ```json
+{
+  "intent": "richiesta_informazioni",
+  "tone": "formale",
+  "urgency": "bassa",
+  "summary": "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei propri dati."
+}
+```
+2026-03-08 12:49:17.571 | INFO     | email_agents.shared_state:log:59 | semantic_analyzer:semantic {'intent': 'richiesta_informazioni', 'tone': 'formale', 'urgency': 'bassa', 'summary': "Il mittente richiede chiarimenti sulla procedura di aggiornamento dei dati dei dipendenti nel portale aziendale e chiede di sapere se debba procedere con l'aggiornamento dei propri dati."}
+2026-03-08 12:49:17.571 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'semantic_analyzer', 'to_agent': 'router', 'intent': 'richiesta_informazioni', 'tone': 'formale', 'urgency': 'bassa'}
+2026-03-08 12:49:17.573 | INFO     | email_agents.agents.router:run:29 | [PROMPT][router] Sei un sistema di smistamento email aziendale. Devi assegnare l'email al reparto più appropriato.
+
+REPARTI DISPONIBILI E CRITERI:
+- HR: candidature, curriculum, colloqui, assunzioni, ferie, permessi, buste paga, questioni del personale.
+- IT: problemi tecnici, segnalazioni bug, richieste software/hardware, accessi, sistemi informatici, infrastruttura.
+- SALES: proposte commerciali, richieste preventivo, offerte, partnership, nuovi clienti, trattative di vendita.
+- FINANCE: fatture, pagamenti, rimborsi, contabilità, bilanci, questioni fiscali, solleciti di pagamento.
+- SUPPORT: SOLO per richieste di assistenza generica che NON rientrano chiaramente in nessuno dei reparti precedenti. Usa SUPPORT come ultima risorsa quando il contenuto è troppo vago o generico per essere assegnato a un reparto specifico.
+
+INFORMAZIONI EMAIL:
+Mittente: luca.bianchi87@gmail.com
+Destinatari: nadia@aziendaexample.it
+Oggetto: Richiesta chiarimento su procedura interna e aggiornamento dati
+Corpo: Gentili, vi scrivo perch negli ultimi giorni ho notato alcune comunicazioni interne riguardanti l\u2019aggiornamento dei dati dei dipendenti nel portale aziendale e, allo stesso tempo, ho ricevuto un promemoria automatico relativo alla documentazione personale. Non mi per del tutto chiaro se l\u2019aggiornamento richiesto riguardi esclusivamente alcune categorie di dipendenti o se debba essere effettuato da tutti. Nel mio caso, accedendo alla piattaforma, alcuni campi risultano gi compilati mentre altri sembrano facoltativi, quindi non vorrei procedere in modo errato. Inoltre, volevo capire se l\u2019eventuale modifica dei dati di contatto (in particolare numero di telefono e indirizzo di domicilio) richiede anche l\u2019invio di documentazione aggiuntiva oppure se sufficiente aggiornare le informazioni direttamente nel sistema. Grazie
+
+ANALISI SEMANTICA:
+Intent: richiesta_informazioni | Tono: formale | Urgenza: bassa
+
+ISTRUZIONI:
+1. Considera il destinatario: se l'email è indirizzata a un indirizzo di reparto specifico (es. hr@, vendite@, contabilita@, it@, sales@, finance@), dai priorità a quel reparto.
+2. Analizza il contenuto e l'intent per determinare il reparto corretto.
+3. Assegna SUPPORT solo se l'email non è chiaramente classificabile in nessun altro reparto.
+
+Rispondi SOLO con un JSON valido con le chiavi: department (uno tra HR, IT, SALES, FINANCE, SUPPORT), rationale (breve motivazione in italiano della scelta).
+Esempio: {"department": "IT", "rationale": "L'email segnala un problema tecnico con il software aziendale."}
+
+2026-03-08 12:49:57.662 | INFO     | email_agents.agents.router:run:32 | [MODEL_OUTPUT][router] {"department": "HR", "rationale": "La richiesta di chiarimento riguarda la procedura interna per l'aggiornamento dei dati dei dipendenti, quindi è più probabile che sia un problema di HR."}
+2026-03-08 12:49:57.663 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'HR'}
+2026-03-08 12:49:57.663 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'router', 'to_agent': 'END', 'department': 'HR'}
+2026-03-08 12:49:57.664 | INFO     | __main__:analyze_email:174 | analyze_email completed | status=routed history_entries=9

@@ -1,7 +1,7 @@
-import json
 from ..shared_state import SharedState, SemanticAnalysis
 from ..prompts import semantic_analysis_prompt
 from ..prompt_logging import prompt_for_logs, should_log_prompts
+from ..json_utils import extract_json
 from loguru import logger
 
 class SemanticAnalyzerAgent:
@@ -25,9 +25,8 @@ class SemanticAnalyzerAgent:
         response = getattr(self.llm, "invoke", lambda x: getattr(self.llm, "predict", lambda y: "{}")(x))(joined)
         content = getattr(response, "content", response)
         logger.info("[MODEL_OUTPUT][{}] {}", self.name, content)
-        try:
-            data = json.loads(content)
-        except Exception:
+        data = extract_json(content)
+        if not data:
             data = {"intent": None, "tone": None, "urgency": None, "summary": None}
         model_name = getattr(self.llm, "model_name", "unknown")
         state.semantic = SemanticAnalysis(**data, model=model_name)

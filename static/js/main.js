@@ -41,12 +41,12 @@ function formattaData(data) {
 
 function creaBadgeCategoria(categoria) {
 	const colori = {
-		Lavoro: 'bg-blue-100 text-blue-800',
-		Personale: 'bg-green-100 text-green-800',
-		Promozionale: 'bg-purple-100 text-purple-800',
-		Importante: 'bg-red-100 text-red-800',
-		Newsletter: 'bg-yellow-100 text-yellow-800',
-		Altro: 'bg-gray-100 text-gray-800',
+		HR: 'bg-green-100 text-green-800',
+		IT: 'bg-blue-100 text-blue-800',
+		SALES: 'bg-yellow-100 text-yellow-800',
+		FINANCE: 'bg-indigo-100 text-indigo-800',
+		SUPPORT: 'bg-orange-100 text-orange-800',
+		SPAM: 'bg-red-100 text-red-800',
 	};
 	return `<span class="px-2 py-1 rounded text-xs ${colori[categoria] || 'bg-gray-100 text-gray-800'}">${categoria}</span>`;
 }
@@ -85,7 +85,7 @@ function aggiungiEmail(email) {
 			<div class="flex-1">
 				<div class="flex items-center gap-2">
 					<h3 class="font-medium text-gray-900">${email.mittente} → ${email.destinatario}</h3>
-					${creaBadgeCategoria(email.categoria || 'Altro')}
+					${creaBadgeCategoria(email.categoria || 'SUPPORT')}
 					${allegatiIcon}
 				</div>
 				<p class="mt-1 text-sm font-medium text-indigo-700">${oggettoText}</p>
@@ -109,7 +109,7 @@ function mostraDettagliEmail(email) {
 	document.getElementById('dettaglioOggetto').textContent = email.oggetto || '';
 
 	const dettaglioCategoria = document.getElementById('dettaglioCategoria');
-	dettaglioCategoria.textContent = email.categoria || 'Altro';
+	dettaglioCategoria.textContent = email.categoria || 'SUPPORT';
 	dettaglioCategoria.className = 'inline-block px-2 py-1 rounded text-xs mt-1';
 
 	document.getElementById('dettaglioParoleChiave').innerHTML = (email.paroleChiave || [])
@@ -166,7 +166,7 @@ function aggiornaListaEmail() {
 	}
 
 	if (categoriaSelezionata !== 'tutte') {
-		emailFiltrate = emailFiltrate.filter((e) => (e.categoria || 'Altro') === categoriaSelezionata);
+		emailFiltrate = emailFiltrate.filter((e) => (e.categoria || 'SUPPORT') === categoriaSelezionata);
 	}
 
 	conteggioEmail.textContent = `${emailFiltrate.length} email`;
@@ -228,13 +228,12 @@ emailForm?.addEventListener('submit', async (e) => {
 		const routing = data.routing || {};
 		const classification = data.classification || {};
 
-		// Mappa i dati del backend su una categoria frontend (Lavoro, Promozionale, ecc.)
+		// Mappa i dati del backend sulla categoria corrispondente al dipartimento identificato dall'agente di routing
 		function mappaCategoria(routing, classification) {
-			if (classification.is_spam) return 'Promozionale';
+			if (classification.is_spam) return 'SPAM';
 			const dept = (routing.department || '').toUpperCase();
-			if (dept === 'IT' || dept === 'HR' || dept === 'FINANCE' || dept === 'SALES') return 'Lavoro';
-			if (dept === 'SUPPORT') return 'Importante';
-			return 'Altro';
+			const validDepts = ['HR', 'IT', 'SALES', 'FINANCE', 'SUPPORT'];
+			return validDepts.includes(dept) ? dept : 'SUPPORT';
 		}
 
 		const categoria = mappaCategoria(routing, classification);
