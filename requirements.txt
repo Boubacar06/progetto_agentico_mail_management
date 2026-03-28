@@ -1,0 +1,1 @@
+-r emeail_parser/requirements.txt

@@ -224,4 +224,4 @@ def get_logs():
 
 if __name__ == "__main__":
     logger.info("Starting Flask app | log_dir={}", LOG_DIR)
-    app.run(debug=True)
+    app.run(debug=False)

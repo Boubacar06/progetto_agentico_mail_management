@@ -32,9 +32,87 @@ DATA_DIR = PROJECT_ROOT / "data"
 EMAILS_FILE = DATA_DIR / "emails.json"
 _emails_lock = threading.Lock()
 LOG_DIR = configure_logging()
+DEFAULT_OLLAMA_FALLBACK_MODELS = ["llama3.1", "mistral", "deepseek-r1:14b", "deepseek-r1"]
 
 def _truthy_env(name: str) -> bool:
     return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _parse_csv(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _dedupe_keep_order(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for value in values:
+        key = value.strip().lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        ordered.append(value.strip())
+    return ordered
+
+
+def _normalize_model_name(model_name: str) -> str:
+    return model_name.strip().lower()
+
+
+def _model_base_name(model_name: str) -> str:
+    return _normalize_model_name(model_name).split(":", 1)[0]
+
+
+def _fetch_ollama_models(base_url: str) -> list[str] | None:
+    url = f"{base_url.rstrip('/')}/api/tags"
+    req = urllib_request.Request(url, method="GET")
+    try:
+        with urllib_request.urlopen(req, timeout=10) as resp:  # nosec B310
+            raw = resp.read().decode("utf-8")
+        parsed = json.loads(raw)
+    except Exception as exc:
+        logger.warning("Unable to query Ollama models at {}: {}", url, exc)
+        return None
+
+    models = parsed.get("models") or []
+    names: list[str] = []
+    for model in models:
+        if not isinstance(model, dict):
+            continue
+        name = str(model.get("name") or model.get("model") or "").strip()
+        if name:
+            names.append(name)
+    return _dedupe_keep_order(names)
+
+
+def _rank_ollama_models(preferred_model: str, fallback_models: list[str], available_models: list[str] | None) -> list[str]:
+    candidates = _dedupe_keep_order([preferred_model, *fallback_models])
+    if not available_models:
+        return candidates
+
+    available_map = {_normalize_model_name(model): model for model in available_models}
+    available_by_base: dict[str, str] = {}
+    for model in available_models:
+        available_by_base.setdefault(_model_base_name(model), model)
+
+    ordered: list[str] = []
+    for candidate in candidates:
+        exact = available_map.get(_normalize_model_name(candidate))
+        if exact:
+            ordered.append(exact)
+            continue
+        base_match = available_by_base.get(_model_base_name(candidate))
+        if base_match:
+            ordered.append(base_match)
+
+    if not ordered:
+        ordered = list(available_models)
+    else:
+        for available in available_models:
+            if available not in ordered:
+                ordered.append(available)
+    return _dedupe_keep_order(ordered)
 
 def _find_dir(*candidates: Path) -> Path | None:
     for candidate in candidates:
@@ -409,14 +487,19 @@ class OpenAILLM:
 class OllamaLLM:
     """Minimal Ollama client compatible with existing agent calls (.invoke + model_name)."""
 
-    def __init__(self, model: str, base_url: str):
+    def __init__(self, model: str, base_url: str, fallback_models: list[str] | None = None, available_models: list[str] | None = None):
         self.model_name = model
         self.base_url = base_url.rstrip("/")
+        self._fallback_models = fallback_models or []
+        self._available_models = available_models
 
-    def invoke(self, prompt: str):
+    def _candidate_models(self) -> list[str]:
+        return _rank_ollama_models(self.model_name, self._fallback_models, self._available_models)
+
+    def _invoke_with_model(self, prompt: str, model_name: str):
         url = f"{self.base_url}/api/generate"
         payload = {
-            "model": self.model_name,
+            "model": model_name,
             "prompt": prompt,
             "stream": False,
             "options": {"temperature": 0},
@@ -429,35 +512,65 @@ class OllamaLLM:
             method="POST",
         )
 
-        try:
-            with urllib_request.urlopen(req, timeout=120) as resp:  # nosec B310
-                raw = resp.read().decode("utf-8")
-            parsed = json.loads(raw)
-            content = (parsed.get("response") or "{}").strip()
-            return type("Resp", (), {"content": content})()
-        except urllib_error.HTTPError as exc:
-            err_body = ""
+        with urllib_request.urlopen(req, timeout=120) as resp:  # nosec B310
+            raw = resp.read().decode("utf-8")
+        parsed = json.loads(raw)
+        content = (parsed.get("response") or "{}").strip()
+        self.model_name = model_name
+        return type("Resp", (), {"content": content})()
+
+    def invoke(self, prompt: str):
+        url = f"{self.base_url}/api/generate"
+        attempted_models: list[str] = []
+        last_error: Exception | None = None
+
+        for model_name in self._candidate_models():
+            attempted_models.append(model_name)
             try:
-                err_body = exc.read().decode("utf-8")
-            except Exception:
-                pass
-            logger.exception(
-                "Ollama HTTP error | model={} url={} status={} body={} prompt={}",
-                self.model_name,
-                url,
-                exc.code,
-                err_body,
-                prompt_for_logs(prompt),
-            )
-            raise
-        except Exception:
-            logger.exception(
-                "Ollama API call failed | model={} url={} prompt={}",
-                self.model_name,
-                url,
-                prompt_for_logs(prompt),
-            )
-            raise
+                if model_name != self.model_name:
+                    logger.warning("Configured Ollama model '{}' unavailable; retrying with '{}'", self.model_name, model_name)
+                return self._invoke_with_model(prompt, model_name)
+            except urllib_error.HTTPError as exc:
+                err_body = ""
+                try:
+                    err_body = exc.read().decode("utf-8")
+                except Exception:
+                    pass
+
+                is_missing_model = exc.code == 404 and "not found" in err_body.lower()
+                if is_missing_model:
+                    logger.warning(
+                        "Ollama model '{}' not found at {}; trying next candidate if available",
+                        model_name,
+                        url,
+                    )
+                    last_error = exc
+                    continue
+
+                logger.exception(
+                    "Ollama HTTP error | model={} url={} status={} body={} prompt={}",
+                    model_name,
+                    url,
+                    exc.code,
+                    err_body,
+                    prompt_for_logs(prompt),
+                )
+                raise
+            except Exception as exc:
+                logger.exception(
+                    "Ollama API call failed | model={} url={} prompt={}",
+                    model_name,
+                    url,
+                    prompt_for_logs(prompt),
+                )
+                last_error = exc
+                raise
+
+        attempted = ", ".join(attempted_models) if attempted_models else self.model_name
+        logger.error("No usable Ollama model found. Attempted models: {}", attempted)
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError(f"No usable Ollama model found. Attempted models: {attempted}")
 
 
 def _build_llm():
@@ -465,14 +578,25 @@ def _build_llm():
     load_dotenv(dotenv_path=env_path, override=False)
     provider = os.getenv("LLM_PROVIDER", "auto").strip().lower()
     ollama_model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+    ollama_fallback_models = _dedupe_keep_order(
+        _parse_csv(os.getenv("OLLAMA_FALLBACK_MODELS")) or list(DEFAULT_OLLAMA_FALLBACK_MODELS)
+    )
     ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
     openai_key = os.getenv("OPENAI_API_KEY")
     openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     google_key = os.getenv("GOOGLE_API_KEY")
+    available_ollama_models = _fetch_ollama_models(ollama_base_url)
+    ranked_ollama_models = _rank_ollama_models(ollama_model, ollama_fallback_models, available_ollama_models)
+    selected_ollama_model = ranked_ollama_models[0] if ranked_ollama_models else ollama_model
 
     if provider == "ollama":
-        logger.info("Using Ollama model '{}' at {}", ollama_model, ollama_base_url)
-        return OllamaLLM(model=ollama_model, base_url=ollama_base_url)
+        logger.info("Using Ollama model '{}' at {}", selected_ollama_model, ollama_base_url)
+        return OllamaLLM(
+            model=selected_ollama_model,
+            base_url=ollama_base_url,
+            fallback_models=ranked_ollama_models[1:],
+            available_models=available_ollama_models,
+        )
 
     if provider == "openai":
         if HAS_OPENAI and openai_key:
@@ -493,11 +617,15 @@ def _build_llm():
     # Auto priority: Ollama -> OpenAI -> Gemini -> DummyLLM
     if provider == "auto":
         logger.info("LLM_PROVIDER=auto enabled")
-        try:
-            logger.info("Trying Ollama model '{}' at {}", ollama_model, ollama_base_url)
-            return OllamaLLM(model=ollama_model, base_url=ollama_base_url)
-        except Exception:
-            logger.warning("Ollama initialization failed; trying cloud providers")
+        if available_ollama_models is not None:
+            logger.info("Trying Ollama model '{}' at {}", selected_ollama_model, ollama_base_url)
+            return OllamaLLM(
+                model=selected_ollama_model,
+                base_url=ollama_base_url,
+                fallback_models=ranked_ollama_models[1:],
+                available_models=available_ollama_models,
+            )
+        logger.warning("Ollama non raggiungibile o senza modelli leggibili; provo provider alternativi")
 
     if HAS_OPENAI and openai_key:
         logger.info("Using OpenAI model '{}' for agent pipeline", openai_model)

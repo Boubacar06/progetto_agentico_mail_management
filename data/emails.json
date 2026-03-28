@@ -415,5 +415,38 @@
       "rationale": "La richiesta di chiarimento riguarda la procedura interna per l'aggiornamento dei dati dei dipendenti, quindi è più probabile che sia un problema di HR."
     },
     "request_id": "c1e4772c-62b2-4c83-bffe-d419b6ee8d3d"
+  },
+  {
+    "id": "5fa91472-8b4b-457a-9297-eb7a97b03b58",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "lavoratore@azienda.com",
+    "oggetto": "Urgente",
+    "messaggio": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale",
+    "timestamp": "2026-03-28T09:58:39.437Z",
+    "categoria": "SUPPORT",
+    "paroleChiave": [
+      "richiesta_supporto",
+      "formale",
+      "alta"
+    ],
+    "riassunto": "L'utente richiede assistenza per risolvere un problema nel portale aziendale.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": "richiesta_supporto",
+      "model": "llama3.1:latest",
+      "summary": "L'utente richiede assistenza per risolvere un problema nel portale aziendale.",
+      "tone": "formale",
+      "urgency": "alta"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "Il contenuto è troppo vago e generico per essere assegnato a un reparto specifico, ma l'oggetto indica una certa urgenza. Pertanto, viene assegnata alla categoria SUPPORT come ultima risorsa."
+    },
+    "request_id": "0ce73698-910c-460c-bebd-8e1b4c609986"
   }
 ]

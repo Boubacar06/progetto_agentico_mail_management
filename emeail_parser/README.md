@@ -21,11 +21,28 @@ Agents share a central `SharedState` object updated at each step.
 Install dependencies and run tests:
 
 ```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pytest -q
 ```
 
-Copy `.env.example` to `.env` and set `GOOGLE_API_KEY` for Gemini (Google Generative AI) if you want real LLM processing.
+Supported Python versions: 3.11 and 3.12.
+
+Python 3.13 is not currently supported by this dependency set on Windows because `langchain==0.2.14` pulls `numpy<2`, which resolves to `numpy 1.26.4`. For Python 3.13 on Windows, pip does not get a prebuilt wheel for that NumPy version and falls back to a source build, which then requires a local C compiler toolchain.
+
+Copy `.env.example` to `.env` and configure your preferred provider.
+
+For local Ollama usage, set for example:
+
+```env
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.1
+OLLAMA_FALLBACK_MODELS=mistral,deepseek-r1:14b
+```
+
+If the configured Ollama model is not installed, the runtime will automatically try the fallback models and then other locally available Ollama models before failing.
 
 ## Architecture
 
