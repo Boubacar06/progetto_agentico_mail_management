@@ -588,5 +588,71 @@
     "semantic": {},
     "routing": {},
     "request_id": "392f01d1-8008-4d4c-b871-a486bc9603d2"
+  },
+  {
+    "id": "d544940c-ba5e-4e09-bac4-8537c3aa2193",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "andrea.paoli@azienda.com",
+    "oggetto": "Sottoscrizione Abbnamento",
+    "messaggio": "Salve,\nvorrei sottoscrivere con voi un abbonamento all'email parser.\nsono il capo di un'azienda che vende cavolfiori.\n\nsaluti",
+    "timestamp": "2026-03-28T11:26:29.582Z",
+    "categoria": "SALES",
+    "paroleChiave": [
+      "candidatura",
+      "informale",
+      "bassa"
+    ],
+    "riassunto": "Il mittente vuole sottoscrivere un abbonamento all'email parser per la sua azienda di cavolfiori.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0.8,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": "candidatura",
+      "model": "llama3.1:latest",
+      "summary": "Il mittente vuole sottoscrivere un abbonamento all'email parser per la sua azienda di cavolfiori.",
+      "tone": "informale",
+      "urgency": "bassa"
+    },
+    "routing": {
+      "department": "SALES",
+      "rationale": "Il mittente è il capo di un'azienda che vende cavolfiori e chiede di sottoscrivere un abbonamento, quindi la mail dovrebbe essere assegnata al reparto SALES."
+    },
+    "request_id": "a309bca5-0178-47eb-bb58-f1d532aaa1ce"
+  },
+  {
+    "id": "2019dbe8-cf6b-4541-b059-2a7eb55f354f",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "andrea.paoli@azienda.com",
+    "oggetto": "Problema pc aziendale",
+    "messaggio": "Salve,\nnon mi funzionano più le casse del pc aziendale avrei bisogno di una riparazione.\n\nsaluti",
+    "timestamp": "2026-03-28T11:31:40.110Z",
+    "categoria": "IT",
+    "paroleChiave": [
+      "richiesta_supporto",
+      "informale",
+      "media"
+    ],
+    "riassunto": "Il destinatario ha un problema con il pc aziendale e richiede una riparazione.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0.8,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": "richiesta_supporto",
+      "model": "llama3.1:latest",
+      "summary": "Il destinatario ha un problema con il pc aziendale e richiede una riparazione.",
+      "tone": "informale",
+      "urgency": "media"
+    },
+    "routing": {
+      "department": "IT",
+      "rationale": "Il mittente segnala un problema con le casse del pc aziendale, quindi è una richiesta di supporto tecnico."
+    },
+    "request_id": "5e07ba54-1061-4f64-941a-5ecca0d7d956"
   }
 ]

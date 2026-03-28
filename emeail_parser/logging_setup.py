@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from loguru import logger
@@ -22,6 +23,9 @@ def configure_logging() -> Path:
 
     level = os.getenv("LOG_LEVEL", "INFO").upper()
 
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    log_filename = f"agentic_execution_{timestamp}.txt"
+
     logger.remove()
     logger.add(
         sys.stderr,
@@ -37,16 +41,15 @@ def configure_logging() -> Path:
         ),
     )
     logger.add(
-        str(log_dir / "agentic_execution.txt"),
+        str(log_dir / log_filename),
         level=level,
         enqueue=True,
         encoding="utf-8",
-        rotation="10 MB",
         retention="14 days",
         compression="zip",
         format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {message}",
     )
 
     _CONFIGURED = True
-    logger.info("Loguru configured. Log directory: {}", log_dir)
+    logger.info("Loguru configured. Log file: {}", log_dir / log_filename)
     return log_dir

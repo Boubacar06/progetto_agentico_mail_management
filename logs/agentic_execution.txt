@@ -1557,3 +1557,41 @@ Esempio: {"department": "IT", "rationale": "L'email segnala un problema tecnico 
 2026-03-28 12:01:16.000 | INFO     | email_agents.shared_state:log:59 | router:routed {'department': 'SUPPORT'}
 2026-03-28 12:01:16.001 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'router', 'to_agent': 'END', 'department': 'SUPPORT'}
 2026-03-28 12:01:16.006 | INFO     | __main__:analyze_email:136 | analyze_email completed | status=routed history_entries=9
+2026-03-28 12:07:50.413 | INFO     | emeail_parser.logging_setup:configure_logging:51 | Loguru configured. Log directory: C:\Users\berti\OneDrive\Documenti\progetti\progetto_agentico_mail_management\logs
+2026-03-28 12:07:52.117 | INFO     | __main__:<module>:226 | Starting Flask app | log_dir=C:\Users\berti\OneDrive\Documenti\progetti\progetto_agentico_mail_management\logs
+2026-03-28 12:09:29.823 | INFO     | __main__:analyze_email:122 | analyze_email received | sender=mittente1@gmail.com recipient=lavoratore@azienda.com subject=Urgente chars=158
+2026-03-28 12:09:29.828 | INFO     | emeail_parser.run:_build_llm:623 | LLM_PROVIDER=auto enabled
+2026-03-28 12:09:29.828 | INFO     | emeail_parser.run:_build_llm:625 | Trying Ollama model 'llama3.1:latest' at http://127.0.0.1:11434
+2026-03-28 12:09:29.840 | INFO     | email_agents.shared_state:log:59 | orchestrator:start {'entry_point': 'parse'}
+2026-03-28 12:09:29.840 | INFO     | email_agents.shared_state:log:59 | parser:parsed {'subject': 'Urgente'}
+2026-03-28 12:09:29.840 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'parser', 'to_agent': 'spam_classifier', 'subject': 'Urgente', 'body_length': 158}
+2026-03-28 12:09:29.840 | INFO     | email_agents.agents.classifier:run:22 | [PROMPT][spam_classifier] RUOLO: Sei un filtro di sicurezza email aziendale. Il tuo UNICO compito è CLASSIFICARE email ricevute come spam/phishing oppure legittime. Non stai creando contenuti, stai proteggendo gli utenti analizzando messaggi già ricevuti nella loro casella di posta.
+
+COMPITO: Analizza l'email riportata sotto (mittente, oggetto e corpo) e restituisci un giudizio di classificazione. Questo è un compito di sicurezza informatica: devi valutare se il messaggio è pericoloso per il destinatario.
+
+CRITERI DI CLASSIFICAZIONE:
+Classifica come SPAM/PHISHING se presenti UNO O PIÙ di questi indicatori:
+- Mittente sospetto: domini sconosciuti, indirizzi che imitano aziende note, indirizzi generici o casuali
+- Oggetto allarmistico o troppo allettante: vincite, premi, account bloccato, azione urgente richiesta
+- Contenuto manipolativo: inviti a cliccare link, offerte troppo vantaggiose, promesse di denaro/premi, richieste di dati personali o credenziali, linguaggio pressante, urgenza artificiosa, minacce di conseguenze
+- Tentativi di impersonificazione aziendale: email che sembrano interne ma con contenuti anomali
+
+Classifica come HAM (legittima) se:
+- Comunicazione personale o lavorativa coerente
+- Richiesta legittima senza pressione artificiale
+- Mittente e contenuto coerenti tra loro
+
+EMAIL RICEVUTA DA CLASSIFICARE:
+From: mittente1@gmail.com
+Subject: Urgente
+Body: clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di euro. clicca sbrigati, se non clicchi perderai l'occasione.
+
+OUTPUT: Rispondi ESCLUSIVAMENTE con un JSON valido. Nessuna spiegazione, nessun commento.
+Chiavi: is_spam (true/false), confidence (numero tra 0 e 1).
+Esempio: {"is_spam": true, "confidence": 0.95}
+
+2026-03-28 12:10:08.162 | INFO     | email_agents.agents.classifier:run:25 | [MODEL_OUTPUT][spam_classifier] {"is_spam": true, "confidence": 0.99}
+2026-03-28 12:10:08.162 | INFO     | email_agents.agents.classifier:run:31 | Classifier response | is_spam=True confidence=0.99 model=llama3.1:latest
+2026-03-28 12:10:08.162 | INFO     | email_agents.shared_state:log:59 | spam_classifier:classified {'is_spam': True, 'confidence': 0.99}
+2026-03-28 12:10:08.164 | INFO     | email_agents.shared_state:log:59 | orchestrator:handoff {'from_agent': 'spam_classifier', 'to_agent': 'END', 'decision': 'spam', 'confidence': 0.99}
+2026-03-28 12:10:08.164 | INFO     | __main__:analyze_email:136 | analyze_email completed | status=spam history_entries=5
