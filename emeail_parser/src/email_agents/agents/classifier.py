@@ -17,7 +17,7 @@ class SpamClassifierAgent:
         if state.body_text is None:
             state.mark_error(self.name, "No body_text to classify")
             return
-        prompt = spam_classifier_prompt.format(subject=state.subject or "", body=state.body_text)
+        prompt = spam_classifier_prompt.format(sender=state.sender or "", subject=state.subject or "", body=state.body_text)
         if should_log_prompts():
             logger.info("[PROMPT][{}] {}", self.name, prompt_for_logs(prompt))
         response = getattr(self.llm, "invoke", lambda x: self.llm.predict(x))(prompt)
@@ -25,6 +25,7 @@ class SpamClassifierAgent:
         logger.info("[MODEL_OUTPUT][{}] {}", self.name, content)
         data = extract_json(content)
         if not data:
+            logger.warning("Failed to extract JSON from model output: {}", content)
             data = {"is_spam": False, "confidence": 0.0}
         model_name = getattr(self.llm, "model_name", "unknown")
         logger.info("Classifier response | is_spam={} confidence={} model={}", data.get("is_spam"), data.get("confidence"), model_name)

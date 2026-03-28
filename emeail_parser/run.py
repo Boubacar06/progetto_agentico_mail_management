@@ -362,6 +362,10 @@ class DummyLLM:
         "lottery", "win money", "congratulations you won", "free gift",
         "click here", "act now", "limited time", "buy now", "unsubscribe",
         "offerta speciale", "hai vinto", "clicca qui", "gratis",
+        "clicca su", "vincerai", "vinci", "milioni di euro", "premio",
+        "sbrigati", "perderai", "occasione imperdibile", "non perdere",
+        "guadagna", "soldi facili", "100% gratis", "offerta limitata",
+        "urgente clicca", "incredibile offerta", "rispondi subito",
     ]
     _DEPT_KEYWORDS = {
         "IT": ["vpn", "password", "login", "server", "computer", "software",
@@ -413,7 +417,7 @@ class DummyLLM:
         lower = prompt.lower()
 
         # --- Spam classification ---
-        if "classify" in lower:
+        if "classify" in lower or "classificatore" in lower or "is_spam" in lower:
             is_spam = self._match_any(lower, self._SPAM_KEYWORDS)
             confidence = 0.92 if is_spam else 0.85
             return type("Resp", (), {"content": json.dumps(
@@ -421,7 +425,7 @@ class DummyLLM:
             )})()
 
         # --- Routing ---
-        if "decide best department" in lower:
+        if "decide best department" in lower or "smistamento" in lower or "reparto" in lower:
             dept = self._detect_department(lower)
             return type("Resp", (), {"content": json.dumps(
                 {"department": dept, "rationale": "keyword heuristic"}

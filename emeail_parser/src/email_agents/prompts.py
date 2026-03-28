@@ -6,16 +6,33 @@ except ImportError:
     from langchain.prompts import PromptTemplate, ChatPromptTemplate  # type: ignore
 
 spam_classifier_prompt = PromptTemplate(
-    input_variables=["subject", "body"],
+    input_variables=["sender", "subject", "body"],
     template=(
-        "Sei un classificatore anti-spam. Analizza l'email seguente e stabilisci se è SPAM o HAM (non spam).\n"
-        "Considera come indicatori di spam: link sospetti, offerte troppo vantaggiose, richieste di dati personali, "
-        "mittenti sconosciuti con contenuti generici, linguaggio pressante o ingannevole.\n"
-        "Considera come HAM: comunicazioni personali, lavorative, richieste legittime, risposte a conversazioni esistenti.\n\n"
-        "Subject: {subject}\nBody: {body}\n\n"
-        "Rispondi SOLO con un JSON valido con le chiavi: is_spam (true/false), confidence (numero tra 0 e 1).\n"
-        "Esempio: {{\"is_spam\": false, \"confidence\": 0.95}}\n"
-        "Rispondi sempre in italiano."
+        "RUOLO: Sei un filtro di sicurezza email aziendale. Il tuo UNICO compito è CLASSIFICARE email ricevute "
+        "come spam/phishing oppure legittime. Non stai creando contenuti, stai proteggendo gli utenti analizzando "
+        "messaggi già ricevuti nella loro casella di posta.\n\n"
+        "COMPITO: Analizza l'email riportata sotto (mittente, oggetto e corpo) e restituisci un giudizio "
+        "di classificazione. Questo è un compito di sicurezza informatica: devi valutare se il messaggio "
+        "è pericoloso per il destinatario.\n\n"
+        "CRITERI DI CLASSIFICAZIONE:\n"
+        "Classifica come SPAM/PHISHING se presenti UNO O PIÙ di questi indicatori:\n"
+        "- Mittente sospetto: domini sconosciuti, indirizzi che imitano aziende note, indirizzi generici o casuali\n"
+        "- Oggetto allarmistico o troppo allettante: vincite, premi, account bloccato, azione urgente richiesta\n"
+        "- Contenuto manipolativo: inviti a cliccare link, offerte troppo vantaggiose, promesse di denaro/premi, "
+        "richieste di dati personali o credenziali, linguaggio pressante, urgenza artificiosa, "
+        "minacce di conseguenze\n"
+        "- Tentativi di impersonificazione aziendale: email che sembrano interne ma con contenuti anomali\n\n"
+        "Classifica come HAM (legittima) se:\n"
+        "- Comunicazione personale o lavorativa coerente\n"
+        "- Richiesta legittima senza pressione artificiale\n"
+        "- Mittente e contenuto coerenti tra loro\n\n"
+        "EMAIL RICEVUTA DA CLASSIFICARE:\n"
+        "From: {sender}\n"
+        "Subject: {subject}\n"
+        "Body: {body}\n\n"
+        "OUTPUT: Rispondi ESCLUSIVAMENTE con un JSON valido. Nessuna spiegazione, nessun commento.\n"
+        "Chiavi: is_spam (true/false), confidence (numero tra 0 e 1).\n"
+        "Esempio: {{\"is_spam\": true, \"confidence\": 0.95}}\n"
     ),
 )
 

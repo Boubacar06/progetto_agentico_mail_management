@@ -448,5 +448,145 @@
       "rationale": "Il contenuto è troppo vago e generico per essere assegnato a un reparto specifico, ma l'oggetto indica una certa urgenza. Pertanto, viene assegnata alla categoria SUPPORT come ultima risorsa."
     },
     "request_id": "0ce73698-910c-460c-bebd-8e1b4c609986"
+  },
+  {
+    "id": "84c8864a-98f1-452d-a4bc-233f698238ac",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "lavoratore@azienda.com",
+    "oggetto": "Urgente",
+    "messaggio": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale",
+    "timestamp": "2026-03-28T10:14:24.182Z",
+    "categoria": "SUPPORT",
+    "paroleChiave": [
+      "richiesta_supporto",
+      "formale",
+      "alta"
+    ],
+    "riassunto": "L'utente richiede assistenza per risolvere un problema nel portale aziendale.",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": "richiesta_supporto",
+      "model": "llama3.1:latest",
+      "summary": "L'utente richiede assistenza per risolvere un problema nel portale aziendale.",
+      "tone": "formale",
+      "urgency": "alta"
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "Il contenuto è troppo vago e generico per essere assegnato a un reparto specifico, ma l'oggetto indica una certa urgenza. Pertanto, viene assegnata alla categoria SUPPORT come ultima risorsa."
+    },
+    "request_id": "1b50477c-6ad9-4aed-b43b-ae0401c8e24d"
+  },
+  {
+    "id": "3698125e-e5f1-42be-aa26-acd8520c4b1f",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "lavoratore@azienda.com",
+    "oggetto": "Urgente",
+    "messaggio": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di euro. clicca sbrigati, se non clicchi perderai l'occasione.",
+    "timestamp": "2026-03-28T10:24:58.286Z",
+    "categoria": "SUPPORT",
+    "paroleChiave": [],
+    "riassunto": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di e...",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": null,
+      "model": "llama3.1:latest",
+      "summary": null,
+      "tone": null,
+      "urgency": null
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "default"
+    },
+    "request_id": "1800ded0-60db-4d8b-ae61-ffec7c25c453"
+  },
+  {
+    "id": "ad9198fa-92cc-4b6a-b223-6dc33b707a4c",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "lavoratore@azienda.com",
+    "oggetto": "Urgente",
+    "messaggio": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di euro. clicca sbrigati, se non clicchi perderai l'occasione.",
+    "timestamp": "2026-03-28T10:46:18.382Z",
+    "categoria": "SUPPORT",
+    "paroleChiave": [],
+    "riassunto": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di e...",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": null,
+      "model": "llama3.1:latest",
+      "summary": null,
+      "tone": null,
+      "urgency": null
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "default"
+    },
+    "request_id": "4d79487c-5dc7-4d0d-99aa-85ca91b30b12"
+  },
+  {
+    "id": "f8a5f8ac-0bb6-40ac-97a5-c7bb2e32694d",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "lavoratore@azienda.com",
+    "oggetto": "Urgente",
+    "messaggio": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di euro. clicca sbrigati, se non clicchi perderai l'occasione.",
+    "timestamp": "2026-03-28T11:01:16.011Z",
+    "categoria": "SUPPORT",
+    "paroleChiave": [],
+    "riassunto": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di e...",
+    "allegati": [],
+    "classification": {
+      "confidence": 0,
+      "is_spam": false,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {
+      "intent": null,
+      "model": "llama3.1:latest",
+      "summary": null,
+      "tone": null,
+      "urgency": null
+    },
+    "routing": {
+      "department": "SUPPORT",
+      "rationale": "default"
+    },
+    "request_id": "73db0c86-5b23-4650-bbdb-bae69c0b4836"
+  },
+  {
+    "id": "640d256a-e66c-44a2-94cd-b369d46a8c86",
+    "mittente": "mittente1@gmail.com",
+    "destinatario": "lavoratore@azienda.com",
+    "oggetto": "Urgente",
+    "messaggio": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di euro. clicca sbrigati, se non clicchi perderai l'occasione.",
+    "timestamp": "2026-03-28T11:10:08.173Z",
+    "categoria": "SPAM",
+    "paroleChiave": [],
+    "riassunto": "clicca su questo link per risolvere i tuoi problemi nel portale aziendale e vincerai 10 milioni di e...",
+    "allegati": [],
+    "classification": {
+      "confidence": 0.99,
+      "is_spam": true,
+      "model": "llama3.1:latest"
+    },
+    "semantic": {},
+    "routing": {},
+    "request_id": "392f01d1-8008-4d4c-b871-a486bc9603d2"
   }
 ]
